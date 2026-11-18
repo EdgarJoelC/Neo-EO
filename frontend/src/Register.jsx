@@ -1,21 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
-import {
-  User,
-  Mail,
-  Lock,
-  Phone,
-  Eye,
-  EyeOff,
-  ShieldCheck,
-  AlertCircle,
-  CheckCircle2,
-  ArrowRight,
-  ArrowLeft,
-  Loader2,
-} from "lucide-react";
-import "./Register.css";
+import "./auth.css";
 
 export default function Register() {
   const [firstName, setFirstName] = useState("");
@@ -60,72 +46,56 @@ export default function Register() {
       localStorage.setItem("token", res.data.jwtToken);
       localStorage.setItem("user", JSON.stringify(res.data.user));
 
-      setSuccess("¡Registro exitoso! Preparando tu cuenta bancaria...");
+      setSuccess("Registro exitoso. Redirigiendo a tu cuenta bancaria...");
       setError("");
 
       setTimeout(() => navigate("/dashboard"), 1500);
     } catch (err) {
       setError(
         err.response?.data?.message ||
-          "Error en el registro. Por favor verifica tus datos e intenta nuevamente."
+          "Error en el registro. Verifica tus datos e intenta nuevamente."
       );
       setSuccess("");
-      console.error(err);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="register-page">
-      <div className="register-nav-top">
-        <Link to="/" className="register-back-btn">
-          <ArrowLeft size={16} />
-          <span>Volver al inicio</span>
+    <div className="nb-auth-page">
+      <header className="nb-auth-topbar">
+        <Link to="/" className="nb-auth-brand">
+          <img src="/logo_trimmed.png" alt="NeoBank" className="nb-auth-logo-slot" />
+          <span>NEOBANK</span>
         </Link>
-      </div>
+        <Link to="/" className="nb-auth-back">
+          Volver al inicio
+        </Link>
+      </header>
 
-      <main className="register-container">
-        {/* Contenedor del Logotipo con realce visual y resplandor de marca */}
-        <div className="register-logo-showcase">
-          <div className="register-logo-halo" />
-          <img
-            className="register-main-logo"
-            src="/logo_trimmed.png"
-            alt="NeoBank Logotipo Institucional"
-          />
-        </div>
+      <main className="nb-auth-main">
+        <div className="nb-auth-card nb-auth-card-wide">
+          <div className="nb-auth-head">
+            <h1>Crear Cuenta Personal</h1>
+            <p>Completa tus datos para abrir tu cuenta bancaria digital</p>
+          </div>
 
-        <div className="register-header">
-          <h1 className="register-title">Crear Cuenta Personal</h1>
-          <p className="register-subtitle">
-            Abre tu cuenta bancaria digital en menos de 2 minutos
-          </p>
-        </div>
+          <form onSubmit={handleRegister} className="nb-auth-form" noValidate>
+            {error && (
+              <div className="nb-auth-alert" role="alert">
+                {error}
+              </div>
+            )}
 
-        <form onSubmit={handleRegister} className="register-form" noValidate>
-          {error && (
-            <div className="register-error-banner" role="alert">
-              <AlertCircle size={18} className="register-alert-icon" />
-              <span>{error}</span>
-            </div>
-          )}
+            {success && (
+              <div className="nb-auth-success" role="status">
+                {success}
+              </div>
+            )}
 
-          {success && (
-            <div className="register-success-banner" role="status">
-              <CheckCircle2 size={18} className="register-success-icon" />
-              <span>{success}</span>
-            </div>
-          )}
-
-          {/* Fila Nombre y Apellido en Grid */}
-          <div className="register-grid-row">
-            <div className="register-field">
-              <label htmlFor="register-firstname" className="register-label">
-                Nombre
-              </label>
-              <div className="register-input-wrapper">
-                <User size={18} className="register-input-icon" />
+            <div className="nb-auth-row">
+              <div className="nb-auth-group">
+                <label htmlFor="register-firstname">Nombre</label>
                 <input
                   id="register-firstname"
                   type="text"
@@ -134,19 +104,13 @@ export default function Register() {
                   placeholder="Carlos"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  className="register-input"
                   required
                   disabled={isLoading}
                 />
               </div>
-            </div>
 
-            <div className="register-field">
-              <label htmlFor="register-lastname" className="register-label">
-                Apellido
-              </label>
-              <div className="register-input-wrapper">
-                <User size={18} className="register-input-icon" />
+              <div className="nb-auth-group">
+                <label htmlFor="register-lastname">Apellido</label>
                 <input
                   id="register-lastname"
                   type="text"
@@ -155,41 +119,29 @@ export default function Register() {
                   placeholder="Mendoza"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  className="register-input"
                   required
                   disabled={isLoading}
                 />
               </div>
             </div>
-          </div>
 
-          <div className="register-field">
-            <label htmlFor="register-email" className="register-label">
-              Correo Electrónico
-            </label>
-            <div className="register-input-wrapper">
-              <Mail size={18} className="register-input-icon" />
+            <div className="nb-auth-group">
+              <label htmlFor="register-email">Correo Electrónico</label>
               <input
                 id="register-email"
                 type="email"
                 name="email"
                 autoComplete="email"
-                placeholder="ejemplo@correo.com"
+                placeholder="nombre@dominio.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="register-input"
                 required
                 disabled={isLoading}
               />
             </div>
-          </div>
 
-          <div className="register-field">
-            <label htmlFor="register-phone" className="register-label">
-              Número de Teléfono <span className="register-optional">(opcional)</span>
-            </label>
-            <div className="register-input-wrapper">
-              <Phone size={18} className="register-input-icon" />
+            <div className="nb-auth-group">
+              <label htmlFor="register-phone">Teléfono (opcional)</label>
               <input
                 id="register-phone"
                 type="tel"
@@ -198,104 +150,73 @@ export default function Register() {
                 placeholder="+51 987 654 321"
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
-                className="register-input"
                 disabled={isLoading}
               />
             </div>
-          </div>
 
-          {/* Fila Contraseñas en Grid */}
-          <div className="register-grid-row">
-            <div className="register-field">
-              <label htmlFor="register-password" className="register-label">
-                Contraseña
-              </label>
-              <div className="register-input-wrapper">
-                <Lock size={18} className="register-input-icon" />
+            <div className="nb-auth-row">
+              <div className="nb-auth-group">
+                <div className="nb-auth-label-row">
+                  <label htmlFor="register-password">Contraseña</label>
+                  <button
+                    type="button"
+                    className="nb-auth-toggle"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? "Ocultar" : "Mostrar"}
+                  </button>
+                </div>
                 <input
                   id="register-password"
                   type={showPassword ? "text" : "password"}
                   name="password"
                   autoComplete="new-password"
-                  placeholder="••••••••"
+                  placeholder="Mínimo 6 caracteres"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="register-input has-toggle"
                   required
                   disabled={isLoading}
                 />
-                <button
-                  type="button"
-                  className="register-password-toggle"
-                  onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? "Ocultar contraseña" : "Ver contraseña"}
-                  tabIndex={0}
-                >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
               </div>
-            </div>
 
-            <div className="register-field">
-              <label htmlFor="register-repeat-password" className="register-label">
-                Confirmar Contraseña
-              </label>
-              <div className="register-input-wrapper">
-                <Lock size={18} className="register-input-icon" />
+              <div className="nb-auth-group">
+                <div className="nb-auth-label-row">
+                  <label htmlFor="register-repeat-password">Confirmar</label>
+                  <button
+                    type="button"
+                    className="nb-auth-toggle"
+                    onClick={() => setShowRepeatPassword(!showRepeatPassword)}
+                  >
+                    {showRepeatPassword ? "Ocultar" : "Mostrar"}
+                  </button>
+                </div>
                 <input
                   id="register-repeat-password"
                   type={showRepeatPassword ? "text" : "password"}
                   name="repeatPassword"
                   autoComplete="new-password"
-                  placeholder="••••••••"
+                  placeholder="Repite tu contraseña"
                   value={repeatPassword}
                   onChange={(e) => setRepeatPassword(e.target.value)}
-                  className="register-input has-toggle"
                   required
                   disabled={isLoading}
                 />
-                <button
-                  type="button"
-                  className="register-password-toggle"
-                  onClick={() => setShowRepeatPassword(!showRepeatPassword)}
-                  aria-label={showRepeatPassword ? "Ocultar contraseña" : "Ver contraseña"}
-                  tabIndex={0}
-                >
-                  {showRepeatPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
               </div>
             </div>
+
+            <button
+              type="submit"
+              className="nb-auth-submit"
+              disabled={isLoading}
+            >
+              {isLoading ? "Creando cuenta..." : "Registrarme en NeoBank"}
+            </button>
+          </form>
+
+          <div className="nb-auth-foot">
+            <span>¿Ya tienes una cuenta activa?</span>
+            <Link to="/login">Inicia sesión aquí</Link>
           </div>
-
-          <button
-            type="submit"
-            className={`register-submit-btn ${isLoading ? "is-loading" : ""}`}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <Loader2 size={18} className="register-spinner" />
-                <span>Creando cuenta bancaria...</span>
-              </>
-            ) : (
-              <>
-                <span>Registrarme en NeoBank</span>
-                <ArrowRight size={18} className="register-btn-arrow" />
-              </>
-            )}
-          </button>
-
-          <div className="register-footer-nav">
-            <span className="register-login-prompt">¿Ya dispones de una cuenta activa?</span>
-            <Link to="/login" className="register-login-link">
-              Inicia sesión aquí
-            </Link>
-          </div>
-        </form>
-
-        <div className="register-trust-badge">
-          <ShieldCheck size={16} className="register-trust-icon" />
-          <span>Protección de fondos & cifrado bancario institucional SSL 256-bit</span>
         </div>
       </main>
     </div>

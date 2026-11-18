@@ -23,14 +23,12 @@ export default function AdminLoans() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Modales
   const [showApproveModal, setShowApproveModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [selectedLoan, setSelectedLoan] = useState(null);
   const [adminNotes, setAdminNotes] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
 
-  // Feedback
   const [feedbackSuccess, setFeedbackSuccess] = useState("");
   const [feedbackError, setFeedbackError] = useState("");
 
@@ -44,7 +42,6 @@ export default function AdminLoans() {
       });
       setLoans(res.data || []);
     } catch (err) {
-      console.error("Error al cargar solicitudes de préstamo:", err);
       setFeedbackError("No se pudieron cargar los préstamos.");
     } finally {
       setLoading(false);
@@ -54,7 +51,6 @@ export default function AdminLoans() {
 
   useEffect(() => {
     fetchLoans();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   const handleRefresh = () => {
@@ -72,7 +68,6 @@ export default function AdminLoans() {
     setTimeout(() => setFeedbackError(""), 5000);
   };
 
-  // Aprobar Préstamo
   const handleApprove = async (e) => {
     e.preventDefault();
     if (!selectedLoan) return;
@@ -86,7 +81,7 @@ export default function AdminLoans() {
       setShowApproveModal(false);
       setAdminNotes("");
       showSuccess(
-        `¡Préstamo #${selectedLoan.id} aprobado exitosamente! Fondos de $${Number(selectedLoan.amount).toLocaleString()} USD acreditados.`
+        `¡Préstamo #${selectedLoan.id} aprobado! Fondos de $${Number(selectedLoan.amount).toLocaleString()} USD acreditados.`
       );
       await fetchLoans();
     } catch (err) {
@@ -96,7 +91,6 @@ export default function AdminLoans() {
     }
   };
 
-  // Rechazar Préstamo
   const handleReject = async (e) => {
     e.preventDefault();
     if (!selectedLoan) return;
@@ -118,14 +112,12 @@ export default function AdminLoans() {
     }
   };
 
-  // Métricas
   const totalRequested = loans.reduce((acc, l) => acc + (Number(l.amount) || 0), 0);
   const pendingCount = loans.filter((l) => l.status === "PENDING").length;
   const approvedTotal = loans
     .filter((l) => l.status === "APPROVED" || l.status === "PAID")
     .reduce((acc, l) => acc + (Number(l.amount) || 0), 0);
 
-  // Filtrado compuesto (estado + texto de búsqueda)
   const filteredLoans = loans.filter((l) => {
     const matchesStatus = filterStatus === "ALL" ? true : l.status === filterStatus;
     const term = searchTerm.toLowerCase().trim();
@@ -154,7 +146,6 @@ export default function AdminLoans() {
 
   return (
     <AdminLayout>
-      {/* Encabezado */}
       <div className="admin-header-row">
         <div>
           <h1>Gestión de Créditos y Préstamos</h1>
@@ -164,14 +155,18 @@ export default function AdminLoans() {
         </div>
 
         <div className="admin-header-actions">
-          <button className="quick-link-btn" onClick={handleRefresh} disabled={refreshing}>
-            <RefreshCw className={`icon ${refreshing ? "spin" : ""}`} />{" "}
-            {refreshing ? "Sincronizando..." : "Actualizar"}
+          <button
+            type="button"
+            className="quick-link-btn"
+            onClick={handleRefresh}
+            disabled={refreshing}
+          >
+            <RefreshCw size={15} className={refreshing ? "spin" : ""} />
+            <span>{refreshing ? "Sincronizando..." : "Actualizar"}</span>
           </button>
         </div>
       </div>
 
-      {/* Alertas de Feedback */}
       {feedbackSuccess && (
         <div className="admin-alert success">
           <CheckCircle2 size={18} />
@@ -185,13 +180,12 @@ export default function AdminLoans() {
         </div>
       )}
 
-      {/* 3 Métricas Ejecutivas */}
       <div className="admin-kpi-grid">
         <div className="kpi-card">
           <div className="kpi-header">
             <span>Total en Solicitudes</span>
-            <div className="kpi-icon-wrapper info">
-              <Landmark className="icon" />
+            <div className="kpi-icon-wrapper">
+              <Landmark size={17} />
             </div>
           </div>
           <div className="kpi-value">${totalRequested.toLocaleString()} USD</div>
@@ -203,8 +197,8 @@ export default function AdminLoans() {
         <div className="kpi-card">
           <div className="kpi-header">
             <span>Pendientes de Aprobación</span>
-            <div className={`kpi-icon-wrapper ${pendingCount > 0 ? "warning" : "success"}`}>
-              <Clock className="icon" />
+            <div className="kpi-icon-wrapper">
+              <Clock size={17} />
             </div>
           </div>
           <div className="kpi-value">{pendingCount}</div>
@@ -218,8 +212,8 @@ export default function AdminLoans() {
         <div className="kpi-card">
           <div className="kpi-header">
             <span>Capital Desembolsado</span>
-            <div className="kpi-icon-wrapper success">
-              <TrendingUp className="icon" />
+            <div className="kpi-icon-wrapper">
+              <TrendingUp size={17} />
             </div>
           </div>
           <div className="kpi-value">${approvedTotal.toLocaleString()} USD</div>
@@ -229,10 +223,8 @@ export default function AdminLoans() {
         </div>
       </div>
 
-      {/* Contenedor Principal: Filtros + Búsqueda + Tabla */}
       <div className="admin-content-box">
-        {/* Barra de Filtros y Búsqueda */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "var(--space-3)", marginBottom: "var(--space-4)" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px", marginBottom: "18px" }}>
           <div className="admin-filter-tabs">
             {[
               { id: "ALL", label: `Todas (${loans.length})` },
@@ -253,35 +245,26 @@ export default function AdminLoans() {
           </div>
 
           <div style={{ position: "relative", minWidth: 240 }}>
-            <Search style={{ position: "absolute", left: 12, top: 11, width: 16, height: 16, color: "var(--text-muted)" }} />
+            <Search size={16} style={{ position: "absolute", left: 12, top: 11, color: "#71717a" }} />
             <input
               type="text"
               placeholder="Buscar por usuario, email o motivo..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "8px 12px 8px 36px",
-                backgroundColor: "var(--bg-input)",
-                border: "1px solid var(--border-subtle)",
-                borderRadius: "var(--radius-md)",
-                color: "var(--text-primary)",
-                fontSize: "var(--text-xs)",
-                outline: "none",
-              }}
+              className="report-input"
+              style={{ paddingLeft: "36px" }}
             />
           </div>
         </div>
 
-        {/* Tabla */}
         <div className="table-responsive">
           {loading ? (
-            <div style={{ padding: "var(--space-8)", textAlign: "center", color: "var(--text-muted)" }}>
+            <div style={{ padding: "48px 20px", textAlign: "center", color: "#71717a" }}>
               Cargando solicitudes de crédito...
             </div>
           ) : filteredLoans.length === 0 ? (
-            <div style={{ padding: "var(--space-8)", textAlign: "center", color: "var(--text-muted)" }}>
-              <FileText style={{ width: 32, height: 32, margin: "0 auto var(--space-2)", opacity: 0.5 }} />
+            <div style={{ padding: "48px 20px", textAlign: "center", color: "#71717a" }}>
+              <FileText size={32} style={{ margin: "0 auto 8px", display: "block", opacity: 0.5 }} />
               No se encontraron préstamos para el filtro seleccionado.
             </div>
           ) : (
@@ -305,14 +288,14 @@ export default function AdminLoans() {
                     <td><strong>#{loan.id}</strong></td>
                     <td>
                       <div>
-                        <div style={{ fontWeight: 600, color: "var(--text-primary)" }}>
+                        <div style={{ fontWeight: 600, color: "inherit" }}>
                           {loan.userName || "Usuario"}
                         </div>
                         <div className="table-subtext">{loan.userEmail}</div>
                       </div>
                     </td>
                     <td>
-                      <span style={{ fontWeight: 700, color: "var(--text-primary)", fontVariantNumeric: "tabular-nums" }}>
+                      <span style={{ fontWeight: 700, color: "inherit", fontVariantNumeric: "tabular-nums" }}>
                         ${Number(loan.amount).toLocaleString()} USD
                       </span>
                     </td>
@@ -321,7 +304,7 @@ export default function AdminLoans() {
                       ${Number(loan.monthlyPayment).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                     </td>
                     <td>{loan.purpose || "Crédito Personal"}</td>
-                    <td style={{ whiteSpace: "nowrap", color: "var(--text-muted)", fontSize: "var(--text-xs)" }}>
+                    <td style={{ whiteSpace: "nowrap", color: "#71717a", fontSize: "0.78rem" }}>
                       {loan.createdAt ? new Date(loan.createdAt).toLocaleDateString("es-ES") : "—"}
                     </td>
                     <td>
@@ -346,7 +329,7 @@ export default function AdminLoans() {
                               setAdminNotes("");
                               setShowApproveModal(true);
                             }}
-                            title="Aprobar y desembolsar dinero a la cuenta del usuario"
+                            title="Aprobar y desembolsar dinero"
                           >
                             <Check size={14} /> Aprobar
                           </button>
@@ -374,18 +357,19 @@ export default function AdminLoans() {
           )}
         </div>
 
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalItems={totalItems}
-          startIndex={startIndex}
-          endIndex={endIndex}
-          onPageChange={setCurrentPage}
-          itemLabel="solicitudes"
-        />
+        {totalItems > pageSize && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={totalItems}
+            startIndex={startIndex}
+            endIndex={endIndex}
+            onPageChange={setCurrentPage}
+            itemLabel="solicitudes"
+          />
+        )}
       </div>
 
-      {/* Modal: Aprobar Préstamo */}
       {showApproveModal && (
         <div className="modal-overlay" onClick={() => setShowApproveModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -426,7 +410,6 @@ export default function AdminLoans() {
         </div>
       )}
 
-      {/* Modal: Rechazar Préstamo */}
       {showRejectModal && (
         <div className="modal-overlay" onClick={() => setShowRejectModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>

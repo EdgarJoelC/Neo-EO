@@ -26,21 +26,22 @@ export default function Settings() {
   const [currentTheme, setCurrentTheme] = useState(getTheme());
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
-  // Formularios y estados
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordMsg, setPasswordMsg] = useState({ type: "", text: "" });
 
-  // Toggles de notificaciones
   const [notifEmail, setNotifEmail] = useState(true);
   const [notifPush, setNotifPush] = useState(true);
   const [notifSms, setNotifSms] = useState(false);
   const [twoFactor, setTwoFactor] = useState(true);
 
-  // Preferencias
-  const [language, setLanguage] = useState(() => localStorage.getItem("preferredLanguage") || "es-PE");
-  const [currency, setCurrency] = useState(() => localStorage.getItem("preferredCurrency") || "PEN");
+  const [language, setLanguage] = useState(
+    () => localStorage.getItem("preferredLanguage") || "es-PE"
+  );
+  const [currency, setCurrency] = useState(
+    () => localStorage.getItem("preferredCurrency") || "PEN"
+  );
   const [showToast, setShowToast] = useState(null);
 
   const token = localStorage.getItem("token");
@@ -58,15 +59,15 @@ export default function Settings() {
     return () => window.removeEventListener("themechange", handleThemeChange);
   }, []);
 
+  const triggerToast = (msg) => {
+    setShowToast(msg);
+    setTimeout(() => setShowToast(null), 2500);
+  };
+
   const handleSelectTheme = (targetTheme) => {
     setTheme(targetTheme);
     setCurrentTheme(targetTheme);
     triggerToast(`Tema ${targetTheme === THEMES.LIGHT ? "Claro" : "Oscuro"} activado`);
-  };
-
-  const triggerToast = (msg) => {
-    setShowToast(msg);
-    setTimeout(() => setShowToast(null), 2500);
   };
 
   const handleLogout = () => {
@@ -100,10 +101,9 @@ export default function Settings() {
       setTimeout(() => {
         setIsPasswordModalOpen(false);
         setPasswordMsg({ type: "", text: "" });
-        triggerToast("Contraseña actualizada con éxito");
+        triggerToast("Contraseña actualizada");
       }, 1500);
     } catch (err) {
-      console.error(err);
       setPasswordMsg({
         type: "error",
         text: "Error al cambiar contraseña. Verifica tu contraseña actual.",
@@ -130,19 +130,17 @@ export default function Settings() {
       subtitle="Personaliza tus preferencias visuales, parámetros de seguridad y notificaciones"
     >
       <div className="settings-page-wrapper">
-        {/* Toast Notificación */}
         {showToast && (
           <div className="copy-toast">
-            <CheckCircle2 size={16} style={{ display: "inline", marginRight: "6px" }} />
-            {showToast}
+            <CheckCircle2 size={16} />
+            <span>{showToast}</span>
           </div>
         )}
 
-        {/* SECCIÓN: Apariencia & Visualización */}
         <div className="settings-card">
           <div className="settings-card-header">
             <div className="settings-header-icon-wrap">
-              <Palette size={20} />
+              <Palette size={19} />
             </div>
             <div>
               <h3 className="settings-card-title">Apariencia & Visualización</h3>
@@ -153,7 +151,6 @@ export default function Settings() {
           </div>
 
           <div className="theme-cards-grid">
-            {/* Opción: Modo Oscuro */}
             <div
               className={`theme-card-option ${currentTheme === THEMES.DARK ? "selected" : ""}`}
               onClick={() => handleSelectTheme(THEMES.DARK)}
@@ -175,19 +172,18 @@ export default function Settings() {
               <div className="theme-card-content">
                 <div className="theme-card-info">
                   <span className="theme-card-title">
-                    <Moon size={15} style={{ color: "#38bdf8" }} /> Modo Oscuro
+                    <Moon size={15} /> Modo Oscuro
                   </span>
                   <span className="theme-card-desc">
-                    Recomendado para uso nocturno y menor consumo
+                    Recomendado para uso nocturno y menor fatiga visual
                   </span>
                 </div>
                 <div className="theme-check-dot">
-                  {currentTheme === THEMES.DARK && <Check size={13} />}
+                  {currentTheme === THEMES.DARK && <Check size={12} />}
                 </div>
               </div>
             </div>
 
-            {/* Opción: Modo Claro */}
             <div
               className={`theme-card-option ${currentTheme === THEMES.LIGHT ? "selected" : ""}`}
               onClick={() => handleSelectTheme(THEMES.LIGHT)}
@@ -209,24 +205,24 @@ export default function Settings() {
               <div className="theme-card-content">
                 <div className="theme-card-info">
                   <span className="theme-card-title">
-                    <Sun size={15} style={{ color: "#f59e0b" }} /> Modo Claro
+                    <Sun size={15} /> Modo Claro
                   </span>
                   <span className="theme-card-desc">
-                    Máxima legibilidad y contraste en entornos con luz
+                    Máxima legibilidad y contraste en entornos iluminados
                   </span>
                 </div>
                 <div className="theme-check-dot">
-                  {currentTheme === THEMES.LIGHT && <Check size={13} />}
+                  {currentTheme === THEMES.LIGHT && <Check size={12} />}
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="settings-rows-list" style={{ marginTop: "12px" }}>
+          <div className="settings-rows-list">
             <div className="settings-item-row">
               <div className="settings-item-info">
-                <span className="settings-item-title" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                  <Globe size={15} className="section-icon" /> Idioma de la Plataforma
+                <span className="settings-item-title">
+                  <Globe size={15} /> Idioma de la Plataforma
                 </span>
                 <span className="settings-item-desc">
                   Selecciona el idioma para mensajes, recibos y reportes
@@ -249,8 +245,8 @@ export default function Settings() {
 
             <div className="settings-item-row">
               <div className="settings-item-info">
-                <span className="settings-item-title" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                  <Coins size={15} className="section-icon" /> Moneda Predeterminada
+                <span className="settings-item-title">
+                  <Coins size={15} /> Moneda Predeterminada
                 </span>
                 <span className="settings-item-desc">
                   Moneda base para balances consolidados e informes
@@ -262,7 +258,9 @@ export default function Settings() {
                 onChange={(e) => {
                   setCurrency(e.target.value);
                   localStorage.setItem("preferredCurrency", e.target.value);
-                  window.dispatchEvent(new CustomEvent("currencychange", { detail: { currency: e.target.value } }));
+                  window.dispatchEvent(
+                    new CustomEvent("currencychange", { detail: { currency: e.target.value } })
+                  );
                   triggerToast("Moneda base actualizada a " + e.target.value);
                 }}
               >
@@ -275,16 +273,15 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* 2. SECCIÓN: Seguridad & Credenciales */}
         <div className="settings-card">
           <div className="settings-card-header">
             <div className="settings-header-icon-wrap">
-              <Shield size={20} />
+              <Shield size={19} />
             </div>
             <div>
               <h3 className="settings-card-title">Seguridad & Credenciales</h3>
               <p className="settings-card-desc">
-                Gestiona tus métodos de acceso y protección contra fraudes
+                Gestiona tus métodos de acceso y protección contra accesos no autorizados
               </p>
             </div>
           </div>
@@ -294,13 +291,12 @@ export default function Settings() {
               <div className="settings-item-info">
                 <span className="settings-item-title">Contraseña de Acceso</span>
                 <span className="settings-item-desc">
-                  Actualiza tu clave periódicamente para mantener tu cuenta blindada
+                  Actualiza tu clave periódicamente para mantener tu cuenta protegida
                 </span>
               </div>
               <button
                 type="button"
-                className="btn-hero-secondary"
-                style={{ height: "38px" }}
+                className="btn-hero-secondary btn-settings-sm"
                 onClick={() => setIsPasswordModalOpen(true)}
               >
                 <KeyRound size={15} /> Cambiar Contraseña
@@ -314,7 +310,7 @@ export default function Settings() {
                   Solicita verificación adicional al realizar transferencias de alto valor
                 </span>
               </div>
-              <label className="toggle" style={{ margin: 0 }}>
+              <label className="toggle">
                 <input
                   type="checkbox"
                   checked={twoFactor}
@@ -329,14 +325,13 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* 3. SECCIÓN: Notificaciones & Alertas */}
         <div className="settings-card">
           <div className="settings-card-header">
             <div className="settings-header-icon-wrap">
-              <Bell size={20} />
+              <Bell size={19} />
             </div>
             <div>
-              <h3 className="settings-card-title">Notificaciones & Alertas en Vivo</h3>
+              <h3 className="settings-card-title">Notificaciones & Alertas</h3>
               <p className="settings-card-desc">
                 Configura los canales para recibir avisos de movimientos y seguridad
               </p>
@@ -351,7 +346,7 @@ export default function Settings() {
                   Recibe resúmenes de transferencias, depósitos y cambios de perfil
                 </span>
               </div>
-              <label className="toggle" style={{ margin: 0 }}>
+              <label className="toggle">
                 <input
                   type="checkbox"
                   checked={notifEmail}
@@ -368,7 +363,7 @@ export default function Settings() {
                   Avisos inmediatos al recibir fondos o ejecuciones programadas
                 </span>
               </div>
-              <label className="toggle" style={{ margin: 0 }}>
+              <label className="toggle">
                 <input
                   type="checkbox"
                   checked={notifPush}
@@ -385,7 +380,7 @@ export default function Settings() {
                   Códigos de autorización instantáneos a tu línea telefónica
                 </span>
               </div>
-              <label className="toggle" style={{ margin: 0 }}>
+              <label className="toggle">
                 <input
                   type="checkbox"
                   checked={notifSms}
@@ -397,11 +392,10 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* 4. SECCIÓN: Privacidad & Cierre de Sesión */}
         <div className="settings-card danger-zone">
           <div className="settings-card-header">
-            <div className="settings-header-icon-wrap">
-              <Lock size={20} />
+            <div className="settings-header-icon-wrap danger">
+              <Lock size={19} />
             </div>
             <div>
               <h3 className="settings-card-title">Privacidad & Control de Sesión</h3>
@@ -416,13 +410,12 @@ export default function Settings() {
               <div className="settings-item-info">
                 <span className="settings-item-title">Exportar Registro de Datos Personales</span>
                 <span className="settings-item-desc">
-                  Descarga un archivo seguro con tu historial registrado en formato JSON
+                  Descarga un archivo con tu historial registrado en formato JSON
                 </span>
               </div>
               <button
                 type="button"
-                className="btn-hero-secondary"
-                style={{ height: "38px" }}
+                className="btn-hero-secondary btn-settings-sm"
                 onClick={handleExportData}
               >
                 <Download size={15} /> Exportar Mis Datos
@@ -431,17 +424,14 @@ export default function Settings() {
 
             <div className="settings-item-row">
               <div className="settings-item-info">
-                <span className="settings-item-title" style={{ color: "#ef4444" }}>
-                  Cerrar Sesión Activa
-                </span>
+                <span className="settings-item-title danger-text">Cerrar Sesión Activa</span>
                 <span className="settings-item-desc">
                   Finaliza la sesión actual y elimina los tokens de autenticación de este navegador
                 </span>
               </div>
               <button
                 type="button"
-                className="danger"
-                style={{ height: "38px" }}
+                className="btn btn-danger btn-settings-sm"
                 onClick={handleLogout}
               >
                 <LogOut size={15} /> Cerrar Sesión
@@ -451,7 +441,6 @@ export default function Settings() {
         </div>
       </div>
 
-      {/* Modal de Cambio de Contraseña */}
       <Modal
         isOpen={isPasswordModalOpen}
         onClose={() => setIsPasswordModalOpen(false)}
@@ -478,7 +467,7 @@ export default function Settings() {
           </>
         }
       >
-        <form onSubmit={handlePasswordChange} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+        <form onSubmit={handlePasswordChange} className="password-modal-form">
           <div className="modal-form-group">
             <label>Contraseña Actual</label>
             <input
@@ -513,16 +502,7 @@ export default function Settings() {
           </div>
 
           {passwordMsg.text && (
-            <div
-              style={{
-                padding: "8px 12px",
-                borderRadius: "6px",
-                fontSize: "13px",
-                backgroundColor: passwordMsg.type === "success" ? "rgba(16, 185, 129, 0.15)" : "rgba(239, 68, 68, 0.15)",
-                color: passwordMsg.type === "success" ? "#10b981" : "#ef4444",
-                border: `1px solid ${passwordMsg.type === "success" ? "rgba(16, 185, 129, 0.3)" : "rgba(239, 68, 68, 0.3)"}`,
-              }}
-            >
+            <div className={`password-msg-box ${passwordMsg.type}`}>
               {passwordMsg.text}
             </div>
           )}

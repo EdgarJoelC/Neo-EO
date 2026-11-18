@@ -29,12 +29,12 @@ import "./Bills.css";
 import "./LightMode.css";
 
 const SERVICE_PROVIDERS = [
-  { id: "ELECTRICITY", name: "Electricidad (Luz del Sur / Enel)", icon: Zap, color: "#f59e0b", defaultRef: "Suministro N° 849201" },
-  { id: "WATER", name: "Agua Potable (Sedapal)", icon: Droplets, color: "#06b6d4", defaultRef: "Suministro N° 1029348" },
-  { id: "INTERNET", name: "Internet y Fibra (Win / Claro / Movistar)", icon: Wifi, color: "#3b82f6", defaultRef: "Código Cliente N° 993821" },
-  { id: "PHONE", name: "Telefonía Móvil (Claro / Movistar / Entel)", icon: Smartphone, color: "#10b981", defaultRef: "+51 912 345 678" },
-  { id: "STREAMING", name: "Streaming y Entretenimiento", icon: Tv, color: "#ec4899", defaultRef: "cuenta@usuario.com" },
-  { id: "RENT", name: "Alquiler / Mantenimiento", icon: Home, color: "#8b5cf6", defaultRef: "Dpto 402 Miraflores - Alquiler" },
+  { id: "ELECTRICITY", name: "Electricidad (Luz del Sur / Enel)", icon: Zap, defaultRef: "Suministro N° 849201" },
+  { id: "WATER", name: "Agua Potable (Sedapal)", icon: Droplets, defaultRef: "Suministro N° 1029348" },
+  { id: "INTERNET", name: "Internet y Fibra (Win / Claro / Movistar)", icon: Wifi, defaultRef: "Código Cliente N° 993821" },
+  { id: "PHONE", name: "Telefonía Móvil (Claro / Movistar / Entel)", icon: Smartphone, defaultRef: "+51 912 345 678" },
+  { id: "STREAMING", name: "Streaming y Entretenimiento", icon: Tv, defaultRef: "cuenta@usuario.com" },
+  { id: "RENT", name: "Alquiler / Mantenimiento", icon: Home, defaultRef: "Dpto 402 - Alquiler" },
 ];
 
 export default function Bills() {
@@ -43,7 +43,6 @@ export default function Bills() {
   const [balance, setBalance] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  // Modal Nuevo Pago / Pago Rápido
   const [showModal, setShowModal] = useState(false);
   const [title, setTitle] = useState("");
   const [serviceType, setServiceType] = useState("ELECTRICITY");
@@ -56,7 +55,6 @@ export default function Bills() {
   const [autoDebit, setAutoDebit] = useState(true);
   const [payNow, setPayNow] = useState(false);
 
-  // Feedback
   const [feedbackSuccess, setFeedbackSuccess] = useState("");
   const [feedbackError, setFeedbackError] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
@@ -81,7 +79,6 @@ export default function Bills() {
       setPayments(billsRes.data || []);
       setBalance(userRes.data?.balance ?? 0);
     } catch (err) {
-      console.error("Error al cargar servicios programados:", err);
       setFeedbackError("No se pudieron cargar los servicios programados.");
     } finally {
       setLoading(false);
@@ -94,7 +91,6 @@ export default function Bills() {
       return;
     }
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -115,7 +111,6 @@ export default function Bills() {
     setTimeout(() => setFeedbackError(""), 5000);
   };
 
-  // Abrir modal desde catálogo rápido
   const handleSelectProvider = (provider) => {
     setTitle(provider.name);
     setServiceType(provider.id);
@@ -125,7 +120,6 @@ export default function Bills() {
     setShowModal(true);
   };
 
-  // Guardar nuevo servicio
   const handleSavePayment = async (e) => {
     e.preventDefault();
     if (!amount || parseFloat(amount) <= 0) {
@@ -157,7 +151,7 @@ export default function Bills() {
       setShowModal(false);
       showSuccess(
         payNow
-          ? "¡Servicio pagado exitosamente y programado para los próximos periodos!"
+          ? "Servicio pagado y programado para los próximos periodos."
           : "Servicio programado correctamente."
       );
       await fetchData();
@@ -168,7 +162,6 @@ export default function Bills() {
     }
   };
 
-  // Ejecutar Pago Ahora
   const handleExecuteNow = async (id, paymentAmount, paymentTitle) => {
     if (balance < paymentAmount) {
       showError("Saldo insuficiente en tu cuenta bancaria para pagar este servicio.");
@@ -186,7 +179,7 @@ export default function Bills() {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      showSuccess(`¡Pago de $${paymentAmount} procesado exitosamente para "${paymentTitle}"!`);
+      showSuccess(`Pago de $${paymentAmount} procesado para "${paymentTitle}".`);
       await fetchData();
     } catch (err) {
       showError(err.response?.data?.message || "Error al ejecutar el pago.");
@@ -195,7 +188,6 @@ export default function Bills() {
     }
   };
 
-  // Pausar / Reanudar
   const handleTogglePause = async (id) => {
     setActionLoading(true);
     try {
@@ -207,7 +199,7 @@ export default function Bills() {
       showSuccess(
         res.data?.status === "PAUSED"
           ? "Pago automático pausado."
-          : "Pago automático reanudado con éxito."
+          : "Pago automático reanudado."
       );
       await fetchData();
     } catch (err) {
@@ -217,7 +209,6 @@ export default function Bills() {
     }
   };
 
-  // Eliminar
   const handleDelete = async (id) => {
     if (!window.confirm("¿Seguro que deseas cancelar este servicio programado?")) return;
     setActionLoading(true);
@@ -238,9 +229,9 @@ export default function Bills() {
     const provider = SERVICE_PROVIDERS.find((p) => p.id === type);
     if (provider) {
       const Icon = provider.icon;
-      return <Icon size={20} style={{ color: provider.color }} />;
+      return <Icon size={18} />;
     }
-    return <Briefcase size={20} style={{ color: "#64748b" }} />;
+    return <Briefcase size={18} />;
   };
 
   const getFrequencyLabel = (freq) => {
@@ -271,22 +262,20 @@ export default function Bills() {
       title="Pago de Servicios y Pagos Recurrentes"
       subtitle="Paga tus facturas de servicios, configura débito automático y evita fechas de vencimiento"
     >
-      {/* Notificaciones */}
       {feedbackSuccess && (
-        <div className="alert-banner success" role="alert" style={{ marginBottom: "16px" }}>
-          <CheckCircle2 size={20} />
+        <div className="alert-banner success" role="alert">
+          <CheckCircle2 size={18} />
           <span>{feedbackSuccess}</span>
         </div>
       )}
       {feedbackError && (
-        <div className="alert-banner error" role="alert" style={{ marginBottom: "16px" }}>
-          <AlertCircle size={20} />
+        <div className="alert-banner error" role="alert">
+          <AlertCircle size={18} />
           <span>{feedbackError}</span>
         </div>
       )}
 
-      {/* Métricas Globales de Pagos de Servicios */}
-      <div className="account-metrics-grid" style={{ marginBottom: "24px" }}>
+      <div className="account-metrics-grid">
         <MetricCard
           title="Compromiso Mensual"
           value={`$${totalMonthlyCommitment.toLocaleString("en-US", {
@@ -294,7 +283,6 @@ export default function Bills() {
             maximumFractionDigits: 2,
           })}`}
           badge={`${activePayments.length} servicios activos`}
-          icon={Receipt}
           accent="amber"
         />
         <MetricCard
@@ -304,28 +292,26 @@ export default function Bills() {
             maximumFractionDigits: 2,
           })}`}
           badge="Disponible para pagos"
-          icon={Wallet}
           accent="emerald"
         />
         <MetricCard
           title="Débitos Automáticos"
           value={`${autoDebitCount}`}
           badge="Cobros programados"
-          icon={Zap}
           accent="primary"
         />
         <MetricCard
           title="Servicios Totales"
           value={`${payments.length}`}
           badge="En tu agenda"
-          icon={Calendar}
           accent="cyan"
         />
       </div>
 
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "16px" }}>
+      <div className="bills-topbar-actions">
         <button
-          className="new-tx-btn"
+          type="button"
+          className="btn btn-primary"
           onClick={() => {
             setTitle("");
             setServiceType("ELECTRICITY");
@@ -336,67 +322,66 @@ export default function Bills() {
           }}
           aria-label="Programar nuevo pago"
         >
-          <Plus size={18} style={{ display: "inline", verticalAlign: "middle", marginRight: "4px" }} />
-          Programar Servicio
+          <Plus size={16} />
+          <span>Programar Servicio</span>
         </button>
       </div>
 
-        {/* Catálogo Rápido de Servicios */}
-        <section className="bills-catalog-section" aria-label="Catálogo de servicios populares">
-          <div className="section-header-row">
-            <h3>Paga tus Servicios Frecuentes</h3>
-            <span className="catalog-subtitle">Haz clic en un servicio para pagar al instante o programar</span>
-          </div>
+      <section className="bills-catalog-section" aria-label="Catálogo de servicios populares">
+        <div className="bills-section-head">
+          <h3>Paga tus Servicios Frecuentes</h3>
+          <span className="catalog-subtitle">Selecciona un servicio para pagar al instante o programar</span>
+        </div>
 
-          <div className="catalog-cards-grid">
-            {SERVICE_PROVIDERS.map((provider) => {
-              const Icon = provider.icon;
-              return (
-                <button
-                  key={provider.id}
-                  type="button"
-                  className="service-catalog-card"
-                  onClick={() => handleSelectProvider(provider)}
-                >
-                  <div className="catalog-icon-wrap" style={{ backgroundColor: `${provider.color}20`, color: provider.color }}>
-                    <Icon size={24} />
-                  </div>
-                  <div className="catalog-info">
-                    <strong>{provider.name}</strong>
-                    <span>Pago rápido con débito</span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </section>
+        <div className="catalog-cards-grid">
+          {SERVICE_PROVIDERS.map((provider) => {
+            const Icon = provider.icon;
+            return (
+              <button
+                key={provider.id}
+                type="button"
+                className="service-catalog-card"
+                onClick={() => handleSelectProvider(provider)}
+              >
+                <div className="catalog-icon-wrap">
+                  <Icon size={20} />
+                </div>
+                <div className="catalog-info">
+                  <strong>{provider.name}</strong>
+                  <span>Pago rápido con débito</span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </section>
 
-        {/* Lista de Pagos Programados */}
-        <section className="scheduled-payments-section">
-          <div className="section-header-row">
-            <div>
-              <h3>Tus Pagos Programados y Facturas ({payments.length})</h3>
-              <p className="subtitle">
-                Pagos automáticos activos gestionados por la red bancaria de NEO.
-              </p>
-            </div>
+      <section className="scheduled-payments-section">
+        <div className="bills-section-head">
+          <div>
+            <h3>Tus Pagos Programados y Facturas ({payments.length})</h3>
+            <p className="subtitle">
+              Pagos automáticos activos gestionados desde tu cuenta NeoBank.
+            </p>
           </div>
+        </div>
 
-          {loading ? (
-            <div className="bills-loading">
-              <RefreshCw className="spin" size={32} />
-              <p>Cargando servicios programados...</p>
-            </div>
-          ) : payments.length === 0 ? (
-            <div className="bills-empty-state">
-              <Receipt size={44} className="empty-icon" />
-              <h4>No tienes servicios ni facturas programadas</h4>
-              <p>
-                Selecciona uno de los servicios del catálogo superior o agrega tus facturas mensuales para pagar a tiempo sin recargos.
-              </p>
-            </div>
-          ) : (
-            <div className="bills-table-card">
+        {loading ? (
+          <div className="bills-loading">
+            <RefreshCw className="spin" size={28} />
+            <p>Cargando servicios programados...</p>
+          </div>
+        ) : payments.length === 0 ? (
+          <div className="bills-empty-state">
+            <Receipt size={36} className="empty-icon" />
+            <h4>No tienes servicios ni facturas programadas</h4>
+            <p>
+              Selecciona uno de los servicios del catálogo superior o agrega tus facturas mensuales para pagar a tiempo.
+            </p>
+          </div>
+        ) : (
+          <div className="bills-table-card">
+            <div className="bills-table-wrap">
               <table className="bills-table">
                 <thead>
                   <tr>
@@ -466,7 +451,6 @@ export default function Bills() {
                                   className="btn btn-secondary btn-sm"
                                   onClick={() => handleExecuteNow(p.id, p.amount, p.title)}
                                   disabled={actionLoading}
-                                  title="Pagar cuota ahora mismo"
                                 >
                                   Pagar Ahora
                                 </button>
@@ -475,7 +459,7 @@ export default function Bills() {
                                   className={`btn-icon-action ${isPaused ? "resume" : "pause"}`}
                                   onClick={() => handleTogglePause(p.id)}
                                   disabled={actionLoading}
-                                  title={isPaused ? "Reanudar cobros automáticos" : "Pausar temporalmente"}
+                                  title={isPaused ? "Reanudar" : "Pausar"}
                                 >
                                   {isPaused ? <Play size={15} /> : <Pause size={15} />}
                                 </button>
@@ -486,7 +470,7 @@ export default function Bills() {
                               className="btn-icon-action delete"
                               onClick={() => handleDelete(p.id)}
                               disabled={actionLoading}
-                              title="Cancelar este servicio programado"
+                              title="Eliminar"
                             >
                               <Trash2 size={15} />
                             </button>
@@ -497,177 +481,170 @@ export default function Bills() {
                   })}
                 </tbody>
               </table>
-
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalItems={totalItems}
-                startIndex={startIndex}
-                endIndex={endIndex}
-                onPageChange={setCurrentPage}
-                itemLabel="servicios"
-              />
             </div>
-          )}
-        </section>
 
-        {/* Modal: Programar / Pagar Servicio */}
-        <Modal
-          isOpen={showModal}
-          onClose={() => setShowModal(false)}
-          title="Programar Pago de Servicio"
-          subtitle="Ingresa los datos de tu factura o servicio para automatizar los pagos"
-          icon={Receipt}
-          maxWidth="520px"
-        >
-          <form onSubmit={handleSavePayment}>
-            <div className="form-group" style={{ marginBottom: "16px" }}>
-              <label className="form-label" htmlFor="serviceTitleInput" style={{ display: "block", marginBottom: "6px", color: "#ddd" }}>
-                Nombre / Empresa del Servicio
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalItems}
+              startIndex={startIndex}
+              endIndex={endIndex}
+              onPageChange={setCurrentPage}
+              itemLabel="servicios"
+            />
+          </div>
+        )}
+      </section>
+
+      <Modal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        title="Programar Pago de Servicio"
+        subtitle="Ingresa los datos de tu factura o servicio para automatizar los pagos"
+        icon={Receipt}
+        maxWidth="520px"
+      >
+        <form onSubmit={handleSavePayment} className="bills-modal-form">
+          <div className="form-group">
+            <label className="form-label" htmlFor="serviceTitleInput">
+              Nombre / Empresa del Servicio
+            </label>
+            <input
+              id="serviceTitleInput"
+              type="text"
+              className="form-control"
+              placeholder="Ej. Luz del Sur, Sedapal, Alquiler Dpto"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="bills-form-row-2">
+            <div className="form-group">
+              <label className="form-label" htmlFor="serviceTypeSelect">
+                Tipo de Servicio
               </label>
-              <input
-                id="serviceTitleInput"
-                type="text"
-                className="form-control modal-input"
-                placeholder="Ej. Luz del Sur, Sedapal, Alquiler Dpto"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-                style={{ width: "100%" }}
-              />
-            </div>
-
-            <div className="form-row-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "16px" }}>
-              <div className="form-group">
-                <label className="form-label" htmlFor="serviceTypeSelect" style={{ display: "block", marginBottom: "6px", color: "#ddd" }}>
-                  Tipo de Servicio
-                </label>
-                <select
-                  id="serviceTypeSelect"
-                  className="form-control select-custom modal-input"
-                  value={serviceType}
-                  onChange={(e) => setServiceType(e.target.value)}
-                  style={{ width: "100%" }}
-                >
-                  <option value="ELECTRICITY">Electricidad</option>
-                  <option value="WATER">Agua Potable</option>
-                  <option value="INTERNET">Internet / Telecom</option>
-                  <option value="PHONE">Telefonía Móvil</option>
-                  <option value="STREAMING">Streaming</option>
-                  <option value="RENT">Alquiler / Expensas</option>
-                  <option value="OTHER">Otro Servicio</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label" htmlFor="frequencySelect" style={{ display: "block", marginBottom: "6px", color: "#ddd" }}>
-                  Frecuencia de Pago
-                </label>
-                <select
-                  id="frequencySelect"
-                  className="form-control select-custom modal-input"
-                  value={frequency}
-                  onChange={(e) => setFrequency(e.target.value)}
-                  style={{ width: "100%" }}
-                >
-                  <option value="MONTHLY">Mensual</option>
-                  <option value="BIWEEKLY">Quincenal</option>
-                  <option value="WEEKLY">Semanal</option>
-                  <option value="ONE_TIME">Pago Único</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="form-group" style={{ marginBottom: "16px" }}>
-              <label className="form-label" htmlFor="referenceInput" style={{ display: "block", marginBottom: "6px", color: "#ddd" }}>
-                Referencia / Contrato / N° de Cuenta
-              </label>
-              <input
-                id="referenceInput"
-                type="text"
-                className="form-control modal-input"
-                placeholder="Ej. Suministro 1029348"
-                value={accountReference}
-                onChange={(e) => setAccountReference(e.target.value)}
-                required
-                style={{ width: "100%" }}
-              />
-            </div>
-
-            <div className="form-row-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "16px" }}>
-              <div className="form-group">
-                <label className="form-label" htmlFor="billAmountInput" style={{ display: "block", marginBottom: "6px", color: "#ddd" }}>
-                  Monto a Pagar ($ USD / S/. PEN)
-                </label>
-                <input
-                  id="billAmountInput"
-                  type="number"
-                  min="1"
-                  step="0.01"
-                  className="form-control modal-input"
-                  placeholder="0.00"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  required
-                  style={{ width: "100%" }}
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label" htmlFor="nextDateInput" style={{ display: "block", marginBottom: "6px", color: "#ddd" }}>
-                  Fecha Próximo Pago
-                </label>
-                <input
-                  id="nextDateInput"
-                  type="date"
-                  className="form-control modal-input"
-                  value={nextExecutionDate}
-                  onChange={(e) => setNextExecutionDate(e.target.value)}
-                  required
-                  style={{ width: "100%" }}
-                />
-              </div>
-            </div>
-
-            {/* Opciones */}
-            <div className="bills-checkbox-group" style={{ display: "flex", flexDirection: "column", gap: "10px", margin: "16px 0" }}>
-              <label className="checkbox-label" style={{ display: "flex", alignItems: "flex-start", gap: "8px", fontSize: "0.9rem" }}>
-                <input
-                  type="checkbox"
-                  checked={payNow}
-                  onChange={(e) => setPayNow(e.target.checked)}
-                />
-                <span>
-                  <strong>Pagar ahora mismo la primera cuota</strong> (se deducirá ${amount || "0.00"} USD inmediatamente de tu saldo)
-                </span>
-              </label>
-
-              <label className="checkbox-label" style={{ display: "flex", alignItems: "flex-start", gap: "8px", fontSize: "0.9rem" }}>
-                <input
-                  type="checkbox"
-                  checked={autoDebit}
-                  onChange={(e) => setAutoDebit(e.target.checked)}
-                />
-                <span>
-                  <strong>Habilitar Débito Automático</strong> (cobro desatendido en la fecha correspondiente)
-                </span>
-              </label>
-            </div>
-
-            <div className="modal-actions" style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "20px" }}>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => setShowModal(false)}
+              <select
+                id="serviceTypeSelect"
+                className="form-control"
+                value={serviceType}
+                onChange={(e) => setServiceType(e.target.value)}
               >
-                Cancelar
-              </button>
-              <button type="submit" className="btn btn-primary" disabled={actionLoading}>
-                {actionLoading ? "Guardando..." : payNow ? "Pagar y Programar" : "Guardar Servicio"}
-              </button>
+                <option value="ELECTRICITY">Electricidad</option>
+                <option value="WATER">Agua Potable</option>
+                <option value="INTERNET">Internet / Telecom</option>
+                <option value="PHONE">Telefonía Móvil</option>
+                <option value="STREAMING">Streaming</option>
+                <option value="RENT">Alquiler / Expensas</option>
+                <option value="OTHER">Otro Servicio</option>
+              </select>
             </div>
-          </form>
-        </Modal>
+
+            <div className="form-group">
+              <label className="form-label" htmlFor="frequencySelect">
+                Frecuencia de Pago
+              </label>
+              <select
+                id="frequencySelect"
+                className="form-control"
+                value={frequency}
+                onChange={(e) => setFrequency(e.target.value)}
+              >
+                <option value="MONTHLY">Mensual</option>
+                <option value="BIWEEKLY">Quincenal</option>
+                <option value="WEEKLY">Semanal</option>
+                <option value="ONE_TIME">Pago Único</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label" htmlFor="referenceInput">
+              Referencia / Contrato / N° de Cuenta
+            </label>
+            <input
+              id="referenceInput"
+              type="text"
+              className="form-control"
+              placeholder="Ej. Suministro 1029348"
+              value={accountReference}
+              onChange={(e) => setAccountReference(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="bills-form-row-2">
+            <div className="form-group">
+              <label className="form-label" htmlFor="billAmountInput">
+                Monto a Pagar ($ USD)
+              </label>
+              <input
+                id="billAmountInput"
+                type="number"
+                min="1"
+                step="0.01"
+                className="form-control"
+                placeholder="0.00"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label" htmlFor="nextDateInput">
+                Fecha Próximo Pago
+              </label>
+              <input
+                id="nextDateInput"
+                type="date"
+                className="form-control"
+                value={nextExecutionDate}
+                onChange={(e) => setNextExecutionDate(e.target.value)}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="bills-checkbox-group">
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={payNow}
+                onChange={(e) => setPayNow(e.target.checked)}
+              />
+              <span>
+                <strong>Pagar ahora mismo la primera cuota</strong> (se deducirá ${amount || "0.00"} USD inmediatamente de tu saldo)
+              </span>
+            </label>
+
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={autoDebit}
+                onChange={(e) => setAutoDebit(e.target.checked)}
+              />
+              <span>
+                <strong>Habilitar Débito Automático</strong> (cobro desatendido en la fecha correspondiente)
+              </span>
+            </label>
+          </div>
+
+          <div className="modal-actions">
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => setShowModal(false)}
+            >
+              Cancelar
+            </button>
+            <button type="submit" className="btn btn-primary" disabled={actionLoading}>
+              {actionLoading ? "Guardando..." : payNow ? "Pagar y Programar" : "Guardar Servicio"}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </ClientLayout>
   );
 }

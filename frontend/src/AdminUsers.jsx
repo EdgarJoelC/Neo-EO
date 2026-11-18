@@ -22,9 +22,8 @@ export default function AdminUsers() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Estados para ajuste de saldo
   const [adjustAmount, setAdjustAmount] = useState("");
-  const [adjustType, setAdjustType] = useState("CREDIT"); // CREDIT | DEBIT
+  const [adjustType, setAdjustType] = useState("CREDIT");
   const [adjustReason, setAdjustReason] = useState("");
   const [adjustError, setAdjustError] = useState("");
   const [adjustLoading, setAdjustLoading] = useState(false);
@@ -43,7 +42,6 @@ export default function AdminUsers() {
       });
       setUsers(res.data || []);
     } catch (err) {
-      console.error("Error al cargar usuarios:", err);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -52,7 +50,6 @@ export default function AdminUsers() {
 
   useEffect(() => {
     fetchUsers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   const handleRefresh = () => {
@@ -164,7 +161,6 @@ export default function AdminUsers() {
         closeModal();
       }
     } catch (err) {
-      console.error("Error al ejecutar acción sobre usuario:", err);
       const msg =
         err.response?.data?.message ||
         (typeof err.response?.data === "string" ? err.response?.data : null) ||
@@ -175,11 +171,9 @@ export default function AdminUsers() {
     }
   };
 
-  // Métricas
   const activeCount = users.filter((u) => u.status === "ACTIVE").length;
   const frozenCount = users.filter((u) => u.status === "FROZEN").length;
 
-  // Filtrado
   const filteredUsers = users.filter((u) => {
     const matchesStatus = filterStatus === "ALL" ? true : u.status === filterStatus;
     const term = searchTerm.toLowerCase().trim();
@@ -206,7 +200,6 @@ export default function AdminUsers() {
 
   return (
     <AdminLayout>
-      {/* Encabezado */}
       <div className="admin-header-row">
         <div>
           <h1>Directorio y Control de Usuarios</h1>
@@ -216,20 +209,24 @@ export default function AdminUsers() {
         </div>
 
         <div className="admin-header-actions">
-          <button className="quick-link-btn" onClick={handleRefresh} disabled={refreshing}>
-            <RefreshCw className={`icon ${refreshing ? "spin" : ""}`} />{" "}
-            {refreshing ? "Sincronizando..." : "Actualizar"}
+          <button
+            type="button"
+            className="quick-link-btn"
+            onClick={handleRefresh}
+            disabled={refreshing}
+          >
+            <RefreshCw size={15} className={refreshing ? "spin" : ""} />
+            <span>{refreshing ? "Sincronizando..." : "Actualizar"}</span>
           </button>
         </div>
       </div>
 
-      {/* 3 Métricas Resumen */}
       <div className="admin-kpi-grid">
         <div className="kpi-card">
           <div className="kpi-header">
             <span>Total Clientes</span>
-            <div className="kpi-icon-wrapper info">
-              <Users className="icon" />
+            <div className="kpi-icon-wrapper">
+              <Users size={17} />
             </div>
           </div>
           <div className="kpi-value">{users.length}</div>
@@ -241,8 +238,8 @@ export default function AdminUsers() {
         <div className="kpi-card">
           <div className="kpi-header">
             <span>Usuarios Activos</span>
-            <div className="kpi-icon-wrapper success">
-              <UserCheck className="icon" />
+            <div className="kpi-icon-wrapper">
+              <UserCheck size={17} />
             </div>
           </div>
           <div className="kpi-value">{activeCount}</div>
@@ -254,8 +251,8 @@ export default function AdminUsers() {
         <div className="kpi-card">
           <div className="kpi-header">
             <span>Cuentas Congeladas</span>
-            <div className={`kpi-icon-wrapper ${frozenCount > 0 ? "danger" : "success"}`}>
-              <UserX className="icon" />
+            <div className="kpi-icon-wrapper">
+              <UserX size={17} />
             </div>
           </div>
           <div className="kpi-value">{frozenCount}</div>
@@ -267,9 +264,8 @@ export default function AdminUsers() {
         </div>
       </div>
 
-      {/* Contenedor Principal: Filtros + Búsqueda + Tabla */}
       <div className="admin-content-box">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "var(--space-3)", marginBottom: "var(--space-4)" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px", marginBottom: "18px" }}>
           <div className="admin-filter-tabs">
             {[
               { id: "ALL", label: `Todos (${users.length})` },
@@ -288,33 +284,25 @@ export default function AdminUsers() {
           </div>
 
           <div style={{ position: "relative", minWidth: 260 }}>
-            <Search style={{ position: "absolute", left: 12, top: 11, width: 16, height: 16, color: "var(--text-muted)" }} />
+            <Search size={16} style={{ position: "absolute", left: 12, top: 11, color: "#71717a" }} />
             <input
               type="text"
               placeholder="Buscar por nombre, correo o ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "8px 12px 8px 36px",
-                backgroundColor: "var(--bg-input)",
-                border: "1px solid var(--border-subtle)",
-                borderRadius: "var(--radius-md)",
-                color: "var(--text-primary)",
-                fontSize: "var(--text-xs)",
-                outline: "none",
-              }}
+              className="report-input"
+              style={{ paddingLeft: "36px" }}
             />
           </div>
         </div>
 
         <div className="table-responsive">
           {loading ? (
-            <div style={{ padding: "var(--space-8)", textAlign: "center", color: "var(--text-muted)" }}>
+            <div style={{ padding: "48px 20px", textAlign: "center", color: "#71717a" }}>
               Cargando directorio de usuarios...
             </div>
           ) : filteredUsers.length === 0 ? (
-            <div style={{ padding: "var(--space-8)", textAlign: "center", color: "var(--text-muted)" }}>
+            <div style={{ padding: "48px 20px", textAlign: "center", color: "#71717a" }}>
               No se encontraron usuarios para el filtro seleccionado.
             </div>
           ) : (
@@ -335,38 +323,37 @@ export default function AdminUsers() {
                   const initials = `${(u.firstName || "U")[0]}${(u.lastName || "")[0] || ""}`.toUpperCase();
                   return (
                     <tr key={u.id}>
-                      <td style={{ color: "var(--text-muted)", fontSize: "var(--text-xs)" }}>#{u.id}</td>
+                      <td style={{ color: "#71717a", fontSize: "0.78rem" }}>#{u.id}</td>
                       <td>
-                        <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                           <div
                             style={{
                               width: 32,
                               height: 32,
                               borderRadius: "50%",
-                              background: "rgba(14, 165, 233, 0.15)",
-                              color: "var(--primary)",
+                              background: "#09090b",
+                              color: "#ffffff",
                               fontWeight: 700,
                               fontSize: "11px",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
-                              border: "1px solid rgba(14, 165, 233, 0.25)",
                               flexShrink: 0,
                             }}
                           >
                             {initials}
                           </div>
                           <div>
-                            <div style={{ fontWeight: 600, color: "var(--text-primary)" }}>
+                            <div style={{ fontWeight: 600, color: "inherit" }}>
                               {u.firstName || ""} {u.lastName || ""}
                             </div>
                             <div className="table-subtext">{u.role}</div>
                           </div>
                         </div>
                       </td>
-                      <td style={{ color: "var(--text-secondary)", fontSize: "var(--text-xs)" }}>{u.email}</td>
+                      <td style={{ color: "#52525b", fontSize: "0.8rem" }}>{u.email}</td>
                       <td>
-                        <span style={{ fontWeight: 700, color: "var(--success)", fontVariantNumeric: "tabular-nums" }}>
+                        <span style={{ fontWeight: 700, color: "#059669", fontVariantNumeric: "tabular-nums" }}>
                           ${Number(u.balance ?? 0).toLocaleString("es-ES", { minimumFractionDigits: 2 })} USD
                         </span>
                       </td>
@@ -376,11 +363,10 @@ export default function AdminUsers() {
                         </span>
                       </td>
                       <td style={{ textAlign: "right" }}>
-                        <div style={{ display: "inline-flex", gap: "var(--space-2)", alignItems: "center" }}>
+                        <div style={{ display: "inline-flex", gap: "8px", alignItems: "center" }}>
                           <button
                             type="button"
-                            className="btn-action-approve"
-                            style={{ backgroundColor: "var(--primary-subtle)", color: "var(--primary)", borderColor: "rgba(14, 165, 233, 0.3)" }}
+                            className="action-btn adjust"
                             onClick={() => openModal(u, "adjust")}
                             title="Ajustar saldo del usuario manualmente"
                           >
@@ -389,7 +375,7 @@ export default function AdminUsers() {
                           {u.status?.toUpperCase() === "ACTIVE" ? (
                             <button
                               type="button"
-                              className="btn-action-reject"
+                              className="action-btn freeze"
                               onClick={() => openModal(u, "freeze")}
                               title="Congelar cuenta"
                             >
@@ -398,7 +384,7 @@ export default function AdminUsers() {
                           ) : (
                             <button
                               type="button"
-                              className="btn-action-approve"
+                              className="action-btn unfreeze"
                               onClick={() => openModal(u, "unfreeze")}
                               title="Descongelar cuenta"
                             >
@@ -407,8 +393,7 @@ export default function AdminUsers() {
                           )}
                           <button
                             type="button"
-                            className="btn-action-reject"
-                            style={{ opacity: 0.8 }}
+                            className="action-btn freeze"
                             onClick={() => openModal(u, "delete")}
                             title="Eliminar usuario"
                           >
@@ -424,18 +409,19 @@ export default function AdminUsers() {
           )}
         </div>
 
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalItems={totalItems}
-          startIndex={startIndex}
-          endIndex={endIndex}
-          onPageChange={setCurrentPage}
-          itemLabel="usuarios"
-        />
+        {totalItems > pageSize && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={totalItems}
+            startIndex={startIndex}
+            endIndex={endIndex}
+            onPageChange={setCurrentPage}
+            itemLabel="usuarios"
+          />
+        )}
       </div>
 
-      {/* Modal: Ajustar Saldo o Acciones */}
       {showModal && (
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -445,9 +431,9 @@ export default function AdminUsers() {
                 <p className="modal-desc" style={{ marginTop: 4 }}>
                   Titular: <strong>{selectedUser.firstName} {selectedUser.lastName}</strong> ({selectedUser.email})
                 </p>
-                <p style={{ color: "var(--text-secondary)", fontSize: "var(--text-xs)", margin: "8px 0 16px" }}>
+                <p style={{ color: "#71717a", fontSize: "0.8rem", margin: "8px 0 16px" }}>
                   Saldo actual:{" "}
-                  <strong style={{ color: "var(--success)" }}>
+                  <strong style={{ color: "#059669" }}>
                     ${Number(selectedUser.balance ?? 0).toLocaleString("es-ES", { minimumFractionDigits: 2 })} USD
                   </strong>
                 </p>

@@ -61,9 +61,7 @@ const FALLBACK_LOGOS = {
   DOGE: "https://assets.coingecko.com/coins/images/5/large/dogecoin.png",
 };
 
-
-const PIE_COLORS = ["#22d3ee", "#60a5fa", "#7c3aed", "#ec4899", "#22c55e"];
-
+const PIE_COLORS = ["#09090b", "#52525b", "#71717a", "#a1a1aa", "#10b981"];
 
 export default function Crypto() {
   const navigate = useNavigate();
@@ -90,7 +88,6 @@ export default function Crypto() {
   const [holdingsPage, setHoldingsPage] = useState(1);
   const holdingsPageSize = 5;
 
-
   const [searchText, setSearchText] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -114,7 +111,6 @@ export default function Crypto() {
       await Promise.all([loadMe(), loadHoldings(), loadOrders()]);
       await refreshPrices();
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   useEffect(() => {
@@ -122,16 +118,13 @@ export default function Crypto() {
       refreshPrices();
     }, 30000);
     return () => clearInterval(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watchlist, holdings]);
 
   const loadMe = async () => {
     try {
       const r = await axios.get(`${API}/api/auth/me`, auth);
       setFiatBalance(r.data?.balance ?? 0);
-    } catch (e) {
-      console.error(e);
-    }
+    } catch (e) {}
   };
 
   const loadHoldings = async () => {
@@ -157,15 +150,13 @@ export default function Crypto() {
           prev
         )
       );
-    } catch (e) {
-      console.error(e);
-    }
+    } catch (e) {}
   };
 
   const loadOrders = async () => {
     try {
       const r = await axios.get(`${API}/api/crypto/me/orders`, auth);
-    const arr = (r.data || []).map((o) => ({
+      const arr = (r.data || []).map((o) => ({
         id: o.id,
         symbol: normalizeSymbol(o.symbol),
         side: o.side,
@@ -176,9 +167,7 @@ export default function Crypto() {
         createdAt: o.createdAt,
       }));
       setOrders(arr.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
-    } catch (e) {
-      console.error(e);
-    }
+    } catch (e) {}
   };
 
   const refreshPrices = async () => {
@@ -214,7 +203,6 @@ export default function Crypto() {
       }
       setLogos(next);
     } catch (e) {
-      console.error("tickers failed", e);
       setTickers([]);
     } finally {
       setLoadingPrices(false);
@@ -285,7 +273,6 @@ export default function Crypto() {
   const endHoldingIdx = Math.min(startHoldingIdx + holdingsPageSize, totalHoldings);
   const paginatedHoldings = analytics.rows.slice(startHoldingIdx, endHoldingIdx);
 
-
   const pieData = useMemo(() => {
     const arr = holdings
       .map((h) => ({
@@ -315,11 +302,11 @@ export default function Crypto() {
     if (!tradeSymbol) return;
     const usd = parseFloat(tradeUsd);
     if (!(usd > 0)) {
-      setTradeMsg("Enter an amount greater than 0");
+      setTradeMsg("Ingresa un monto mayor a 0");
       return;
     }
     if (usd < 0.01) {
-      setTradeMsg("Minimum is $0.01");
+      setTradeMsg("El mínimo es $0.01");
       return;
     }
     const coinFromWatch = watchlist.find((c) => c.symbol === tradeSymbol);
@@ -335,15 +322,12 @@ export default function Crypto() {
         auth
       );
       setTradeMsg(
-        `${tradeSide} filled: ${r.data.quantity} ${r.data.symbol} @ $${fmt(
-          r.data.price,
-          2
-        )}`
+        `Orden ejecutada: ${r.data.quantity} ${r.data.symbol} @ $${fmt(r.data.price, 2)}`
       );
       await Promise.all([loadMe(), loadHoldings(), loadOrders()]);
       await refreshPrices();
     } catch (e) {
-      const m = e?.response?.data?.message || e?.message || "Order failed";
+      const m = e?.response?.data?.message || e?.message || "No se pudo ejecutar la orden";
       setTradeMsg(m);
     } finally {
       setSubmitting(false);
@@ -374,7 +358,6 @@ export default function Crypto() {
         }));
         setSearchResults(coins);
       } catch (e) {
-        console.error("search failed", e);
         setSearchResults([]);
       }
     }, 250);
@@ -429,6 +412,7 @@ export default function Crypto() {
         <div className="trade-actions">
           <div className="btn-row">
             <button
+              type="button"
               className="btn-trade buy"
               disabled={!supported}
               onClick={() => openTrade(c.symbol, "BUY")}
@@ -436,6 +420,7 @@ export default function Crypto() {
               Comprar
             </button>
             <button
+              type="button"
               className="btn-trade sell"
               disabled={!supported}
               onClick={() => openTrade(c.symbol, "SELL")}
@@ -443,11 +428,7 @@ export default function Crypto() {
               Vender
             </button>
           </div>
-          {!supported && (
-            <div className="hint" style={{ marginTop: 6, opacity: 0.7 }}>
-              No disponible
-            </div>
-          )}
+          {!supported && <div className="coin-unavailable">No disponible</div>}
         </div>
       </div>
     );
@@ -460,8 +441,7 @@ export default function Crypto() {
       subtitle="Compra, venta y custodia de criptoactivos en tiempo real"
     >
       <div className="crypto-box">
-        {/* Métricas Globales de Cripto con MetricCard compartido */}
-        <div className="account-metrics-grid" style={{ marginBottom: "24px" }}>
+        <div className="account-metrics-grid">
           <MetricCard
             title="Valor Total Cartera"
             value={`$${fmt(totalPortfolioValue, 2)}`}
@@ -492,7 +472,6 @@ export default function Crypto() {
           />
         </div>
 
-        {/* Buscador y Actualización */}
         <div className="search-bar">
           <div
             className="search-input-wrap"
@@ -564,7 +543,6 @@ export default function Crypto() {
           </div>
         </div>
 
-        {/* Mercado / Carousel de Criptomonedas */}
         <div>
           <div className="section-title">Mercado de Criptoactivos</div>
           <div className="carousel-wrap">
@@ -575,19 +553,17 @@ export default function Crypto() {
                 </div>
               ))}
               {watchlist.length === 0 && (
-                <div className="empty" style={{ width: "100%", padding: "30px" }}>
-                  <p style={{ margin: 0 }}>No hay monedas en seguimiento.</p>
-                </div>
+                <div className="crypto-empty-box">No hay monedas en seguimiento.</div>
               )}
             </div>
           </div>
         </div>
 
-        {/* Distribución del Portafolio y Resumen */}
         <div className="crypto-portfolio-grid">
           <div className="panel">
-            <div className="panel-title" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <Coins size={18} style={{ color: "var(--primary)" }} /> Distribución del Portafolio
+            <div className="panel-title">
+              <Coins size={17} />
+              <span>Distribución del Portafolio</span>
             </div>
             {pieData.length > 0 ? (
               <div className="chart-container-wrap">
@@ -598,8 +574,8 @@ export default function Crypto() {
                         data={pieData}
                         dataKey="value"
                         nameKey="name"
-                        innerRadius={65}
-                        outerRadius={95}
+                        innerRadius={62}
+                        outerRadius={92}
                         paddingAngle={3}
                         stroke="none"
                       >
@@ -618,24 +594,23 @@ export default function Crypto() {
                         style={{ background: PIE_COLORS[i % PIE_COLORS.length] }}
                       />
                       <span>{p.name}</span>
-                      <span style={{ color: "var(--text-muted)" }}>{fmt(p.pct, 1)}%</span>
+                      <span className="legend-pct">{fmt(p.pct, 1)}%</span>
                     </div>
                   ))}
                 </div>
               </div>
             ) : (
-              <div className="empty" style={{ padding: "40px 20px" }}>
-                <p style={{ margin: 0, fontWeight: 600 }}>Sin posiciones actualmente</p>
-                <p style={{ margin: "6px 0 0", fontSize: "0.85rem", opacity: 0.8 }}>
-                  Adquiere activos desde el mercado para visualizar la composición de tu cartera.
-                </p>
+              <div className="crypto-empty-box">
+                <strong>Sin posiciones actualmente</strong>
+                <span>Adquiere activos desde el mercado para visualizar la composición de tu cartera.</span>
               </div>
             )}
           </div>
 
           <div className="panel">
-            <div className="panel-title" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <TrendingUp size={18} style={{ color: "var(--primary)" }} /> Resumen de Custodia & Rendimiento
+            <div className="panel-title">
+              <TrendingUp size={17} />
+              <span>Resumen de Custodia & Rendimiento</span>
             </div>
             <div className="crypto-breakdown-container">
               <div className="crypto-breakdown-card">
@@ -651,10 +626,9 @@ export default function Crypto() {
               <div className="crypto-breakdown-card">
                 <span className="crypto-breakdown-label">Rendimiento No Realizado</span>
                 <span
-                  className="crypto-breakdown-val"
-                  style={{
-                    color: analytics.totalUPL >= 0 ? "var(--success)" : "var(--danger)",
-                  }}
+                  className={`crypto-breakdown-val ${
+                    analytics.totalUPL >= 0 ? "val-pos" : "val-neg"
+                  }`}
                 >
                   {analytics.totalUPL >= 0 ? "+" : ""}${fmt(analytics.totalUPL, 2)}
                 </span>
@@ -664,18 +638,19 @@ export default function Crypto() {
               </div>
               <div className="crypto-breakdown-card">
                 <span className="crypto-breakdown-label">Activos en Cartera</span>
-                <span className="crypto-breakdown-val">{holdings.length} {holdings.length === 1 ? "moneda" : "monedas"}</span>
+                <span className="crypto-breakdown-val">
+                  {holdings.length} {holdings.length === 1 ? "moneda" : "monedas"}
+                </span>
                 <span className="crypto-breakdown-hint">Posiciones abiertas</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Tabla: Activos en Cartera */}
         <div className="panel">
-          <div className="panel-title" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div className="panel-title-between">
             <span>Activos en Cartera</span>
-            <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", fontWeight: 500 }}>
+            <span className="panel-sub-count">
               {analytics.rows.length} {analytics.rows.length === 1 ? "posición" : "posiciones"}
             </span>
           </div>
@@ -705,39 +680,30 @@ export default function Crypto() {
                           e.currentTarget.src = "/coin.svg";
                         }}
                       />
-                      <div>
-                        <div>{r.symbol}</div>
-                      </div>
+                      <span>{r.symbol}</span>
                     </td>
                     <td>{fmt(r.qty, 8)}</td>
                     <td>${fmt(r.avgCost, 2)}</td>
                     <td>${fmt(r.currentPrice, 2)}</td>
-                    <td style={{ fontWeight: 700 }}>${fmt(r.marketValue, 2)}</td>
+                    <td className="td-bold">${fmt(r.marketValue, 2)}</td>
                     <td>
-                      <span
-                        style={{
-                          color: r.upl >= 0 ? "var(--success)" : "var(--danger)",
-                          fontWeight: 700,
-                          fontSize: "0.85rem",
-                        }}
-                      >
-                        {r.upl >= 0 ? "+" : ""}${fmt(r.upl, 2)} ({r.upl >= 0 ? "+" : ""}{fmt(r.uplPct, 2)}%)
+                      <span className={r.upl >= 0 ? "val-pos td-bold" : "val-neg td-bold"}>
+                        {r.upl >= 0 ? "+" : ""}${fmt(r.upl, 2)} ({r.upl >= 0 ? "+" : ""}
+                        {fmt(r.uplPct, 2)}%)
                       </span>
                     </td>
                     <td style={{ textAlign: "right" }}>
-                      <div style={{ display: "inline-flex", gap: "6px" }}>
+                      <div className="table-trade-actions">
                         <button
                           type="button"
-                          className="btn-trade buy"
-                          style={{ padding: "4px 10px", fontSize: "0.78rem", height: "30px" }}
+                          className="btn-trade buy sm"
                           onClick={() => openTrade(r.symbol, "BUY")}
                         >
                           Comprar
                         </button>
                         <button
                           type="button"
-                          className="btn-trade sell"
-                          style={{ padding: "4px 10px", fontSize: "0.78rem", height: "30px" }}
+                          className="btn-trade sell sm"
                           onClick={() => openTrade(r.symbol, "SELL")}
                         >
                           Vender
@@ -757,25 +723,22 @@ export default function Crypto() {
             </table>
           </div>
           {totalHoldings > holdingsPageSize && (
-            <div style={{ marginTop: "16px" }}>
-              <Pagination
-                currentPage={holdingsPage}
-                totalPages={totalHoldingsPages}
-                totalItems={totalHoldings}
-                startIndex={startHoldingIdx}
-                endIndex={endHoldingIdx}
-                onPageChange={setHoldingsPage}
-                itemLabel="posiciones"
-              />
-            </div>
+            <Pagination
+              currentPage={holdingsPage}
+              totalPages={totalHoldingsPages}
+              totalItems={totalHoldings}
+              startIndex={startHoldingIdx}
+              endIndex={endHoldingIdx}
+              onPageChange={setHoldingsPage}
+              itemLabel="posiciones"
+            />
           )}
         </div>
 
-        {/* Tabla: Historial de Órdenes */}
         <div className="panel">
-          <div className="panel-title" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div className="panel-title-between">
             <span>Historial de Órdenes</span>
-            <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", fontWeight: 500 }}>
+            <span className="panel-sub-count">
               {orders.length} {orders.length === 1 ? "orden" : "órdenes"}
             </span>
           </div>
@@ -801,14 +764,12 @@ export default function Crypto() {
                         {o.side === "BUY" ? "Compra" : "Venta"}
                       </span>
                     </td>
-                    <td style={{ fontWeight: 700 }}>{o.symbol}</td>
+                    <td className="td-bold">{o.symbol}</td>
                     <td>{fmt(o.quantity, 8)}</td>
                     <td>${fmt(o.price, 2)}</td>
-                    <td style={{ fontWeight: 700 }}>${fmt(o.quoteAmount, 2)}</td>
+                    <td className="td-bold">${fmt(o.quoteAmount, 2)}</td>
                     <td>
-                      <span className={`crypto-status-badge ${String(o.status || "").toLowerCase()}`}>
-                        {o.status || "FILLED"}
-                      </span>
+                      <span className="crypto-status-badge">{o.status || "FILLED"}</span>
                     </td>
                   </tr>
                 ))}
@@ -823,34 +784,31 @@ export default function Crypto() {
             </table>
           </div>
           {orders.length > ordersPageSize && (
-            <div style={{ marginTop: "16px" }}>
-              <Pagination
-                currentPage={ordersPage}
-                totalPages={totalOrdersPages}
-                totalItems={totalOrders}
-                startIndex={startOrderIdx}
-                endIndex={endOrderIdx}
-                onPageChange={setOrdersPage}
-                itemLabel="órdenes"
-              />
-            </div>
+            <Pagination
+              currentPage={ordersPage}
+              totalPages={totalOrdersPages}
+              totalItems={totalOrders}
+              startIndex={startOrderIdx}
+              endIndex={endOrderIdx}
+              onPageChange={setOrdersPage}
+              itemLabel="órdenes"
+            />
           )}
         </div>
       </div>
 
-      {/* Modal Reutilizable para Trade de Cripto */}
       <Modal
         isOpen={tradeOpen}
         onClose={() => setTradeOpen(false)}
         title={`${tradeSide === "BUY" ? "Comprar" : "Vender"} ${tradeSymbol}`}
-        subtitle="Ejecución de orden a precio de mercado instantánea"
+        subtitle="Ejecución de orden a precio de mercado"
         icon={Coins}
         maxWidth="460px"
         footer={
-          <div style={{ display: "flex", gap: "10px", width: "100%", justifyContent: "flex-end" }}>
+          <div className="modal-actions">
             <button
               type="button"
-              className="modal-btn cancel"
+              className="btn btn-secondary"
               onClick={() => setTradeOpen(false)}
             >
               Cerrar
@@ -872,16 +830,14 @@ export default function Crypto() {
       >
         <div className="crypto-modal-body">
           <div>
-            <label className="crypto-modal-label">
-              Monto a operar (USD):
-            </label>
+            <label className="crypto-modal-label">Monto a operar (USD)</label>
             <input
               type="number"
               min="0.01"
               step="0.01"
               value={tradeUsd}
               onChange={(e) => setTradeUsd(e.target.value)}
-              className="modal-input"
+              className="form-control"
               placeholder="100.00"
             />
           </div>
@@ -901,12 +857,12 @@ export default function Crypto() {
 
           <div className="crypto-estimates">
             <div className="crypto-estimate-row">
-              <span className="crypto-estimate-label">Precio de Mercado:</span>
+              <span className="crypto-estimate-label">Precio de Mercado</span>
               <span className="crypto-estimate-val">${fmt(priceBy[tradeSymbol], 2)}</span>
             </div>
             <div className="crypto-estimate-row">
-              <span className="crypto-estimate-label">Cantidad Estimada:</span>
-              <span className="crypto-estimate-val accent">
+              <span className="crypto-estimate-label">Cantidad Estimada</span>
+              <span className="crypto-estimate-val">
                 {fmt((Number(tradeUsd || 0) / (priceBy[tradeSymbol] || 1)) || 0, 8)} {tradeSymbol}
               </span>
             </div>
@@ -915,7 +871,7 @@ export default function Crypto() {
           {tradeMsg && (
             <div
               className={`crypto-trade-alert ${
-                tradeMsg.includes("filled") ? "success" : "error"
+                tradeMsg.includes("ejecutada") ? "success" : "error"
               }`}
             >
               {tradeMsg}

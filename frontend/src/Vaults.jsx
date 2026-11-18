@@ -7,10 +7,6 @@ import {
   Trash2,
   AlertCircle,
   CheckCircle2,
-  PiggyBank,
-  Wallet,
-  Target,
-  TrendingUp,
 } from "lucide-react";
 import ClientLayout from "./ClientLayout";
 import MetricCard from "./MetricCard";
@@ -24,14 +20,12 @@ export default function Vaults() {
   const [balance, setBalance] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  // Modales
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedVault, setSelectedVault] = useState(null);
 
-  // Campos de formulario
   const [vaultName, setVaultName] = useState("");
   const [targetAmount, setTargetAmount] = useState("");
   const [actionAmount, setActionAmount] = useState("");
@@ -55,7 +49,7 @@ export default function Vaults() {
       setVaults(vaultsRes.data || []);
       setBalance(userRes.data?.balance ?? 0);
     } catch (err) {
-      console.error("Error al cargar bóvedas:", err);
+      setVaults([]);
     } finally {
       setLoading(false);
     }
@@ -63,10 +57,13 @@ export default function Vaults() {
 
   useEffect(() => {
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
-  // Crear nueva bóveda
+  const showSuccess = (msg) => {
+    setFeedbackSuccess(msg);
+    setTimeout(() => setFeedbackSuccess(""), 4000);
+  };
+
   const handleCreateVault = async (e) => {
     e.preventDefault();
     setModalError("");
@@ -95,16 +92,14 @@ export default function Vaults() {
       setShowCreateModal(false);
       setVaultName("");
       setTargetAmount("");
-      showSuccess("¡Bóveda de ahorro creada con éxito!");
+      showSuccess("Bóveda de ahorro creada.");
     } catch (err) {
-      console.error("Error al crear bóveda:", err);
       setModalError(
         err.response?.data?.message || "No se pudo crear la bóveda de ahorro."
       );
     }
   };
 
-  // Depositar en bóveda (mueve fondos del saldo principal)
   const handleDeposit = async () => {
     setModalError("");
     const parsed = parseFloat(actionAmount);
@@ -134,17 +129,15 @@ export default function Vaults() {
       setActionAmount("");
       setSelectedVault(null);
       showSuccess(
-        `¡Depósito de $${parsed.toFixed(2)} USD transferido a la bóveda!`
+        `Depósito de $${parsed.toFixed(2)} USD transferido a la bóveda.`
       );
     } catch (err) {
-      console.error("Error al depositar en bóveda:", err);
       setModalError(
         err.response?.data?.message || "Error al depositar en la bóveda."
       );
     }
   };
 
-  // Retirar de bóveda (mueve fondos de vuelta al saldo principal)
   const handleWithdraw = async () => {
     setModalError("");
     const parsed = parseFloat(actionAmount);
@@ -176,17 +169,15 @@ export default function Vaults() {
       setActionAmount("");
       setSelectedVault(null);
       showSuccess(
-        `¡Retiro de $${parsed.toFixed(2)} USD acreditado a tu saldo principal!`
+        `Retiro de $${parsed.toFixed(2)} USD acreditado a tu saldo principal.`
       );
     } catch (err) {
-      console.error("Error al retirar de bóveda:", err);
       setModalError(
         err.response?.data?.message || "Error al retirar de la bóveda."
       );
     }
   };
 
-  // Eliminar bóveda (los fondos restantes se reembolsan automáticamente al balance principal)
   const handleDeleteVault = async () => {
     try {
       await axios.delete(
@@ -194,7 +185,6 @@ export default function Vaults() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // El backend reembolsa el currentAmount al balance principal
       const refundedAmount = Number(selectedVault.currentAmount || 0);
       setBalance((prev) => prev + refundedAmount);
       setVaults((prev) => prev.filter((v) => v.id !== selectedVault.id));
@@ -208,14 +198,8 @@ export default function Vaults() {
           : "Bóveda eliminada correctamente."
       );
     } catch (err) {
-      console.error("Error al eliminar bóveda:", err);
       alert("No se pudo eliminar la bóveda. Intenta de nuevo.");
     }
-  };
-
-  const showSuccess = (msg) => {
-    setFeedbackSuccess(msg);
-    setTimeout(() => setFeedbackSuccess(""), 4000);
   };
 
   const totalVaultsSavings = vaults.reduce(
@@ -238,56 +222,36 @@ export default function Vaults() {
       title="Bóvedas de Ahorro"
       subtitle="Separa dinero de tu cuenta principal para alcanzar tus metas financieras"
     >
-      <div className="content-box vaults-container">
+      <div className="vaults-container" style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
         {feedbackSuccess && (
-          <div
-            style={{
-              background: "rgba(74, 222, 128, 0.15)",
-              border: "1px solid #4ade80",
-              color: "#86efac",
-              padding: "12px 18px",
-              borderRadius: "10px",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              fontSize: "0.95rem",
-              marginBottom: "20px",
-            }}
-          >
-            <CheckCircle2 size={20} />
+          <div className="alert-banner success" role="alert">
+            <CheckCircle2 size={18} />
             <span>{feedbackSuccess}</span>
           </div>
         )}
 
-        <div className="vaults-header" style={{ marginBottom: "20px" }}>
+        <div className="vaults-header">
           <div>
             <h2>Mis Metas de Ahorro</h2>
-            <p style={{ color: "#aaa", fontSize: "0.9rem", margin: "4px 0 0 0" }}>
-              Crea bolsillos de ahorro independientes con rendimientos y metas visuales.
+            <p className="vaults-header-sub">
+              Crea bolsillos de ahorro independientes con metas definidas y disponibilidad inmediata.
             </p>
           </div>
 
           <button
-            className="new-tx-btn"
+            type="button"
+            className="btn btn-primary"
             onClick={() => {
               setModalError("");
               setShowCreateModal(true);
             }}
           >
-            <Plus
-              size={18}
-              style={{
-                display: "inline",
-                verticalAlign: "middle",
-                marginRight: "4px",
-              }}
-            />
-            Nueva Bóveda
+            <Plus size={16} />
+            <span>Nueva Bóveda</span>
           </button>
         </div>
 
-        {/* Resumen Superior con MetricCard compartido */}
-        <div className="account-metrics-grid" style={{ marginBottom: "24px" }}>
+        <div className="account-metrics-grid">
           <MetricCard
             title="Total en Bóvedas"
             value={`$${totalVaultsSavings.toLocaleString("en-US", {
@@ -297,7 +261,6 @@ export default function Vaults() {
             badge={`${vaults.length} ${
               vaults.length === 1 ? "bóveda activa" : "bóvedas activas"
             }`}
-            icon={PiggyBank}
             accent="emerald"
           />
           <MetricCard
@@ -307,7 +270,6 @@ export default function Vaults() {
               maximumFractionDigits: 2,
             })}`}
             badge="Disponible para ahorrar"
-            icon={Wallet}
             accent="cyan"
           />
           <MetricCard
@@ -317,178 +279,162 @@ export default function Vaults() {
               maximumFractionDigits: 2,
             })}`}
             badge={`${globalProgress}% alcanzado`}
-            icon={Target}
             accent="primary"
           />
           <MetricCard
             title="Rendimiento Estimado"
             value="4.50% APY"
             badge="Interés compuesto"
-            icon={TrendingUp}
             accent="info"
             subtitle="Generado automáticamente"
           />
         </div>
 
-            {/* Grilla de Bóvedas */}
-            {loading ? (
-              <p>Cargando bóvedas de ahorro...</p>
-            ) : vaults.length === 0 ? (
-              <div className="empty-vaults">
-                <PiggyBank size={48} style={{ color: "#38bdf8", marginBottom: "12px" }} />
-                <h3>Aún no tienes bóvedas de ahorro creadas</h3>
-                <p>Comienza una meta para vacaciones, emergencias o compras especiales.</p>
-                <button
-                  className="new-tx-btn"
-                  style={{ marginTop: "16px" }}
-                  onClick={() => setShowCreateModal(true)}
-                >
-                  Crear mi primera bóveda
-                </button>
-              </div>
-            ) : (
-              <div className="vaults-grid">
-                {vaults.map((vault) => {
-                  const current = Number(vault.currentAmount || 0);
-                  const target = Number(vault.targetAmount || 1);
-                  const progress = Math.min(
-                    100,
-                    Math.round(vault.progressPercentage ?? (current / target) * 100)
-                  );
+        {loading ? (
+          <p className="vaults-loading-text">Cargando bóvedas de ahorro...</p>
+        ) : vaults.length === 0 ? (
+          <div className="vaults-empty">
+            <h3>Aún no tienes bóvedas de ahorro creadas</h3>
+            <p>Comienza una meta para vacaciones, emergencias o compras planificadas.</p>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => setShowCreateModal(true)}
+            >
+              Crear mi primera bóveda
+            </button>
+          </div>
+        ) : (
+          <div className="vaults-grid">
+            {vaults.map((vault) => {
+              const current = Number(vault.currentAmount || 0);
+              const target = Number(vault.targetAmount || 1);
+              const progress = Math.min(
+                100,
+                Math.round(vault.progressPercentage ?? (current / target) * 100)
+              );
 
-                  return (
-                    <div key={vault.id} className="vault-card">
-                      <div className="vault-card-header">
-                        <div>
-                          <h3 className="vault-name">{vault.name}</h3>
-                          <div className="vault-date">
-                            {vault.createdAt
-                              ? `Creada el ${new Date(vault.createdAt).toLocaleDateString("es-ES")}`
-                              : "Meta Activa"}
-                          </div>
-                        </div>
-                        <button
-                          className="vault-delete-btn"
-                          title="Eliminar Bóveda"
-                          onClick={() => {
-                            setSelectedVault(vault);
-                            setShowDeleteModal(true);
-                          }}
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-
-                      <div className="vault-amounts">
-                        <div>
-                          <span style={{ fontSize: "0.8rem", color: "#888", display: "block" }}>
-                            Ahorrado:
-                          </span>
-                          <span className="vault-current">
-                            ${current.toFixed(2)}
-                          </span>
-                        </div>
-                        <div style={{ textAlign: "right" }}>
-                          <span style={{ fontSize: "0.8rem", color: "#888", display: "block" }}>
-                            Meta:
-                          </span>
-                          <span className="vault-target">
-                            ${target.toFixed(2)} USD
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="vault-progress-wrap">
-                        <div className="progress-bar-bg">
-                          <div
-                            className="progress-bar-fill"
-                            style={{ width: `${progress}%` }}
-                          />
-                        </div>
-                        <div className="progress-labels">
-                          <span>Progreso</span>
-                          <span>{progress}%</span>
-                        </div>
-                      </div>
-
-                      <div className="vault-actions">
-                        <button
-                          className="vault-btn deposit"
-                          onClick={() => {
-                            setSelectedVault(vault);
-                            setActionAmount("");
-                            setModalError("");
-                            setShowDepositModal(true);
-                          }}
-                        >
-                          <ArrowDownLeft size={16} /> Depositar
-                        </button>
-                        <button
-                          className="vault-btn withdraw"
-                          disabled={current <= 0}
-                          style={current <= 0 ? { opacity: 0.4, cursor: "not-allowed" } : {}}
-                          onClick={() => {
-                            setSelectedVault(vault);
-                            setActionAmount("");
-                            setModalError("");
-                            setShowWithdrawModal(true);
-                          }}
-                        >
-                          <ArrowUpRight size={16} /> Retirar
-                        </button>
+              return (
+                <div key={vault.id} className="vault-card">
+                  <div className="vault-card-header">
+                    <div>
+                      <h3 className="vault-name">{vault.name}</h3>
+                      <div className="vault-date">
+                        {vault.createdAt
+                          ? `Creada el ${new Date(vault.createdAt).toLocaleDateString("es-ES")}`
+                          : "Meta Activa"}
                       </div>
                     </div>
-                  );
-                })}
+                    <button
+                      type="button"
+                      className="vault-delete-btn"
+                      title="Eliminar Bóveda"
+                      onClick={() => {
+                        setSelectedVault(vault);
+                        setShowDeleteModal(true);
+                      }}
+                    >
+                      <Trash2 size={17} />
+                    </button>
+                  </div>
 
-                <div
-                  className="new-vault-card"
-                  onClick={() => {
-                    setModalError("");
-                    setShowCreateModal(true);
-                  }}
-                >
-                  <div className="new-vault-icon">+</div>
-                  <span style={{ fontWeight: 600 }}>Crear Otra Bóveda</span>
+                  <div className="vault-amounts">
+                    <div>
+                      <span className="vault-amount-caption">Ahorrado</span>
+                      <span className="vault-current">${current.toFixed(2)}</span>
+                    </div>
+                    <div className="vault-target-col">
+                      <span className="vault-amount-caption">Meta</span>
+                      <span className="vault-target">${target.toFixed(2)} USD</span>
+                    </div>
+                  </div>
+
+                  <div className="vault-progress-wrap">
+                    <div className="vault-progress-bar-bg">
+                      <div
+                        className={`vault-progress-bar-fill ${progress >= 100 ? "complete" : ""}`}
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+                    <div className="vault-progress-label">
+                      <span>Progreso</span>
+                      <span className={`vault-pct ${progress >= 100 ? "complete" : ""}`}>
+                        {progress}%
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="vault-actions">
+                    <button
+                      type="button"
+                      className="vault-action-btn deposit"
+                      onClick={() => {
+                        setSelectedVault(vault);
+                        setActionAmount("");
+                        setModalError("");
+                        setShowDepositModal(true);
+                      }}
+                    >
+                      <ArrowDownLeft size={16} /> Depositar
+                    </button>
+                    <button
+                      type="button"
+                      className="vault-action-btn withdraw"
+                      disabled={current <= 0}
+                      onClick={() => {
+                        setSelectedVault(vault);
+                        setActionAmount("");
+                        setModalError("");
+                        setShowWithdrawModal(true);
+                      }}
+                    >
+                      <ArrowUpRight size={16} /> Retirar
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
+              );
+            })}
+
+            <button
+              type="button"
+              className="new-vault-card"
+              onClick={() => {
+                setModalError("");
+                setShowCreateModal(true);
+              }}
+            >
+              <span className="new-vault-icon">+</span>
+              <span>Crear Otra Bóveda</span>
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Modal: Crear Bóveda */}
       <Modal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         title="Nueva Bóveda de Ahorro"
         subtitle="Separa tus fondos con una meta financiera programada"
-        icon={PiggyBank}
       >
         {modalError && (
-          <div className="modal-error-box" style={{ marginBottom: "16px" }}>
-            <AlertCircle
-              size={16}
-              style={{
-                display: "inline",
-                marginRight: "6px",
-                verticalAlign: "middle",
-              }}
-            />
-            {modalError}
+          <div className="modal-error-box">
+            <AlertCircle size={16} />
+            <span>{modalError}</span>
           </div>
         )}
 
         <form onSubmit={handleCreateVault}>
-          <label className="modal-label">Nombre de la Meta:</label>
+          <label className="modal-label">Nombre de la Meta</label>
           <input
             type="text"
             className="modal-input"
-            placeholder="Ej. Vacaciones a Máncora, Fondo de Emergencia, Auto Nuevo"
+            placeholder="Ej. Fondo de Emergencia, Viaje, Auto Nuevo"
             value={vaultName}
             onChange={(e) => setVaultName(e.target.value)}
             required
           />
 
-          <label className="modal-label">Monto Meta Objetivo ($ USD / S/. PEN):</label>
+          <label className="modal-label">Monto Meta Objetivo ($ USD)</label>
           <input
             type="number"
             className="modal-input"
@@ -500,10 +446,7 @@ export default function Vaults() {
             required
           />
 
-          <div className="modal-buttons" style={{ marginTop: "24px" }}>
-            <button type="submit" className="modal-btn confirm">
-              Crear Bóveda
-            </button>
+          <div className="modal-buttons">
             <button
               type="button"
               className="modal-btn cancel"
@@ -511,33 +454,27 @@ export default function Vaults() {
             >
               Cancelar
             </button>
+            <button type="submit" className="modal-btn confirm">
+              Crear Bóveda
+            </button>
           </div>
         </form>
       </Modal>
 
-      {/* Modal: Depositar en Bóveda */}
       <Modal
         isOpen={showDepositModal && !!selectedVault}
         onClose={() => setShowDepositModal(false)}
         title={`Depositar en ${selectedVault?.name || ""}`}
         subtitle={`Se debitará de tu saldo principal ($${balance.toFixed(2)} USD disponibles)`}
-        icon={ArrowDownLeft}
       >
         {modalError && (
-          <div className="modal-error-box" style={{ marginBottom: "16px" }}>
-            <AlertCircle
-              size={16}
-              style={{
-                display: "inline",
-                marginRight: "6px",
-                verticalAlign: "middle",
-              }}
-            />
-            {modalError}
+          <div className="modal-error-box">
+            <AlertCircle size={16} />
+            <span>{modalError}</span>
           </div>
         )}
 
-        <label className="modal-label">Monto a Depositar ($ USD / S/. PEN):</label>
+        <label className="modal-label">Monto a Depositar ($ USD)</label>
         <input
           type="number"
           className="modal-input"
@@ -548,42 +485,34 @@ export default function Vaults() {
           onChange={(e) => setActionAmount(e.target.value)}
         />
 
-        <div className="modal-buttons" style={{ marginTop: "24px" }}>
-          <button className="modal-btn confirm" onClick={handleDeposit}>
-            Confirmar Depósito
-          </button>
+        <div className="modal-buttons">
           <button
+            type="button"
             className="modal-btn cancel"
             onClick={() => setShowDepositModal(false)}
           >
             Cancelar
           </button>
+          <button type="button" className="modal-btn confirm" onClick={handleDeposit}>
+            Confirmar Depósito
+          </button>
         </div>
       </Modal>
 
-      {/* Modal: Retirar de Bóveda */}
       <Modal
         isOpen={showWithdrawModal && !!selectedVault}
         onClose={() => setShowWithdrawModal(false)}
         title={`Retirar de ${selectedVault?.name || ""}`}
-        subtitle={`Fondos en bóveda: $${Number(selectedVault?.currentAmount || 0).toFixed(2)} USD. Se acreditarán al instante a tu saldo.`}
-        icon={ArrowUpRight}
+        subtitle={`Fondos en bóveda: $${Number(selectedVault?.currentAmount || 0).toFixed(2)} USD`}
       >
         {modalError && (
-          <div className="modal-error-box" style={{ marginBottom: "16px" }}>
-            <AlertCircle
-              size={16}
-              style={{
-                display: "inline",
-                marginRight: "6px",
-                verticalAlign: "middle",
-              }}
-            />
-            {modalError}
+          <div className="modal-error-box">
+            <AlertCircle size={16} />
+            <span>{modalError}</span>
           </div>
         )}
 
-        <label className="modal-label">Monto a Retirar ($ USD / S/. PEN):</label>
+        <label className="modal-label">Monto a Retirar ($ USD)</label>
         <input
           type="number"
           className="modal-input"
@@ -594,41 +523,31 @@ export default function Vaults() {
           onChange={(e) => setActionAmount(e.target.value)}
         />
 
-        <div className="modal-buttons" style={{ marginTop: "24px" }}>
-          <button className="modal-btn confirm" onClick={handleWithdraw}>
-            Confirmar Retiro
-          </button>
+        <div className="modal-buttons">
           <button
+            type="button"
             className="modal-btn cancel"
             onClick={() => setShowWithdrawModal(false)}
           >
             Cancelar
           </button>
+          <button type="button" className="modal-btn confirm" onClick={handleWithdraw}>
+            Confirmar Retiro
+          </button>
         </div>
       </Modal>
 
-      {/* Modal: Confirmar Eliminación de Bóveda */}
       <Modal
         isOpen={showDeleteModal && !!selectedVault}
         onClose={() => setShowDeleteModal(false)}
         title={`¿Eliminar ${selectedVault?.name || ""}?`}
         subtitle="Confirma la cancelación de esta meta de ahorro"
-        icon={Trash2}
       >
-        <p
-          style={{
-            fontSize: "0.9rem",
-            lineHeight: "1.5",
-            color: "#ddd",
-            marginBottom: "20px",
-          }}
-        >
+        <p className="vault-delete-desc">
           {Number(selectedVault?.currentAmount || 0) > 0 ? (
             <span>
               Los fondos acumulados de{" "}
-              <strong style={{ color: "#4ade80" }}>
-                ${Number(selectedVault?.currentAmount || 0).toFixed(2)} USD
-              </strong>{" "}
+              <strong>${Number(selectedVault?.currentAmount || 0).toFixed(2)} USD</strong>{" "}
               serán reembolsados automáticamente a tu saldo principal.
             </span>
           ) : (
@@ -638,17 +557,18 @@ export default function Vaults() {
 
         <div className="modal-buttons">
           <button
-            className="modal-btn confirm"
-            style={{ background: "#ef4444" }}
-            onClick={handleDeleteVault}
-          >
-            Sí, Eliminar Bóveda
-          </button>
-          <button
+            type="button"
             className="modal-btn cancel"
             onClick={() => setShowDeleteModal(false)}
           >
             Cancelar
+          </button>
+          <button
+            type="button"
+            className="btn btn-danger"
+            onClick={handleDeleteVault}
+          >
+            Sí, Eliminar Bóveda
           </button>
         </div>
       </Modal>

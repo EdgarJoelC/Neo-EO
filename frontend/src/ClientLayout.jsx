@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
 import ClientHeader from "./ClientHeader";
 import { getTheme, applyThemeToDOM } from "./themeManager";
@@ -14,14 +14,19 @@ export default function ClientLayout({
   className = "",
   contentBox = true,
 }) {
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
   useEffect(() => {
-    // Asegurar que el tema esté aplicado al montar
     applyThemeToDOM(getTheme());
   }, []);
 
+  const toggleSidebar = () => {
+    setIsSidebarCollapsed(!isSidebarCollapsed);
+  };
+
   return (
-    <div className="client-layout-root">
-      <Sidebar active={active} />
+    <div className={`client-layout-root ${isSidebarCollapsed ? "sidebar-collapsed" : ""}`}>
+      <Sidebar active={active} isCollapsed={isSidebarCollapsed} onToggleCollapse={toggleSidebar} />
       <div className="client-layout-main">
         <ClientHeader title={title} subtitle={subtitle} actions={actions} />
         <main className="client-layout-scroll-area">

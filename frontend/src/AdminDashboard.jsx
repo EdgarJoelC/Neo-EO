@@ -28,8 +28,9 @@ import {
   Legend,
 } from "recharts";
 import { MetricCard, Pagination } from "./components";
+import "./Admin.css";
 
-const PIE_COLORS = ["#38bdf8", "#10b981", "#f59e0b"];
+const PIE_COLORS = ["#0284c7", "#10b981", "#f59e0b"];
 
 export default function AdminDashboard() {
   const token = localStorage.getItem("token");
@@ -38,6 +39,15 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [resolvingId, setResolvingId] = useState(null);
+  const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    const checkTheme = () => {
+      const saved = localStorage.getItem("theme");
+      setDarkMode(saved === "dark" || !document.body.classList.contains("light-mode"));
+    };
+    checkTheme();
+  }, []);
 
   const getHeaders = () => ({
     Authorization: `Bearer ${token}`,
@@ -51,7 +61,6 @@ export default function AdminDashboard() {
       });
       setOverview(res.data);
     } catch (err) {
-      console.error("Error fetching overview, trying fallback endpoints:", err);
       try {
         const [balRes, usersRes, txRes] = await Promise.all([
           axios.get("http://localhost:8080/admin/total-balance", { headers: getHeaders() }),
@@ -84,9 +93,7 @@ export default function AdminDashboard() {
           recentAuditLogs: [],
           recentTransactions: txRes.data || [],
         });
-      } catch (fallbackErr) {
-        console.error("Fallback error:", fallbackErr);
-      }
+      } catch (fallbackErr) {}
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -95,7 +102,6 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchOverviewData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   const handleRefresh = () => {
@@ -126,7 +132,6 @@ export default function AdminDashboard() {
         return { ...prev, recentIncidents: updatedIncidents, kpis: updatedKpis };
       });
     } catch (err) {
-      console.error("Error al resolver incidente:", err);
       alert("No se pudo resolver el incidente.");
     } finally {
       setResolvingId(null);
@@ -151,8 +156,8 @@ export default function AdminDashboard() {
   if (loading && !overview) {
     return (
       <AdminLayout>
-        <div style={{ padding: "var(--space-12)", textAlign: "center", color: "var(--text-muted)" }}>
-          <RefreshCw className="icon spin" style={{ width: 32, height: 32, margin: "0 auto var(--space-4)", display: "block" }} />
+        <div style={{ padding: "64px 20px", textAlign: "center", color: "#71717a" }}>
+          <RefreshCw size={28} className="spin" style={{ margin: "0 auto 12px", display: "block" }} />
           Cargando panel de control ejecutivo...
         </div>
       </AdminLayout>
@@ -168,12 +173,18 @@ export default function AdminDashboard() {
         </div>
 
         <div className="admin-header-actions">
-          <button className="quick-link-btn" onClick={handleRefresh} disabled={refreshing}>
-            <RefreshCw className={`icon ${refreshing ? "spin" : ""}`} />{" "}
-            {refreshing ? "Sincronizando..." : "Actualizar"}
+          <button
+            type="button"
+            className="quick-link-btn"
+            onClick={handleRefresh}
+            disabled={refreshing}
+          >
+            <RefreshCw size={15} className={refreshing ? "spin" : ""} />
+            <span>{refreshing ? "Sincronizando..." : "Actualizar"}</span>
           </button>
           <Link to="/admin/database" className="quick-link-btn">
-            <Database className="icon" /> Explorador BD
+            <Database size={15} />
+            <span>Explorador BD</span>
           </Link>
           <a
             href="http://localhost:8080/h2-console"
@@ -182,7 +193,8 @@ export default function AdminDashboard() {
             className="quick-link-btn"
             title="Abrir Consola H2 nativa"
           >
-            <ExternalLink className="icon" /> Consola H2
+            <ExternalLink size={15} />
+            <span>Consola H2</span>
           </a>
         </div>
       </div>
@@ -193,10 +205,8 @@ export default function AdminDashboard() {
           value={`${kpis.totalUsers ?? 0}`}
           badge={`${kpis.activeUsers ?? 0} activos`}
           badgeType="success"
-          icon={Users}
           accent="primary"
           subtitle={Number(kpis.frozenUsers) > 0 ? `${kpis.frozenUsers} congelados` : "Base de clientes activa"}
-          graphicType="wave"
         />
 
         <MetricCard
@@ -204,10 +214,8 @@ export default function AdminDashboard() {
           value={`$${Number(kpis.totalDeposits || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}`}
           badge="Fondos líquidos"
           badgeType="success"
-          icon={Landmark}
           accent="emerald"
           subtitle="En custodia de cuentas"
-          graphicType="bars-emerald"
         />
 
         <MetricCard
@@ -215,10 +223,8 @@ export default function AdminDashboard() {
           value={`$${Number(kpis.totalLoansVolume || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}`}
           badge={`${kpis.activeLoansCount ?? 0} vigentes`}
           badgeType="warning"
-          icon={TrendingUp}
           accent="amber"
           subtitle="Capital colocado"
-          graphicType="bars-amber"
         />
 
         <MetricCard
@@ -226,10 +232,8 @@ export default function AdminDashboard() {
           value={`$${Number(kpis.volume24h || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}`}
           badge={`${kpis.transactions24h ?? 0} operaciones`}
           badgeType="info"
-          icon={Activity}
           accent="cyan"
           subtitle="Actividad del día"
-          graphicType="bars-cyan"
         />
       </div>
 
@@ -246,27 +250,27 @@ export default function AdminDashboard() {
               <AreaChart data={cashflow} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorDeposits" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
+                    <stop offset="5%" stopColor="#059669" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="#059669" stopOpacity={0.0} />
                   </linearGradient>
                   <linearGradient id="colorWithdrawals" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#ef4444" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="#ef4444" stopOpacity={0.0} />
+                    <stop offset="5%" stopColor="#dc2626" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="#dc2626" stopOpacity={0.0} />
                   </linearGradient>
                   <linearGradient id="colorTransfers" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#38bdf8" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="#38bdf8" stopOpacity={0.0} />
+                    <stop offset="5%" stopColor="#09090b" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="#09090b" stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-                <XAxis dataKey="date" stroke="#94a3b8" fontSize={11} />
-                <YAxis stroke="#94a3b8" fontSize={11} tickFormatter={(val) => `$${val}`} />
+                <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? "#27272a" : "#f4f4f5"} />
+                <XAxis dataKey="date" stroke="#71717a" fontSize={11} />
+                <YAxis stroke="#71717a" fontSize={11} tickFormatter={(val) => `$${val}`} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#0f172a",
-                    borderColor: "#334155",
+                    backgroundColor: darkMode ? "#18181b" : "#ffffff",
+                    borderColor: darkMode ? "#27272a" : "#e4e4e7",
                     borderRadius: "8px",
-                    color: "#f8fafc",
+                    color: darkMode ? "#fafafa" : "#09090b",
                     fontSize: "12px",
                   }}
                   formatter={(val) => [`$${Number(val).toLocaleString()}`, ""]}
@@ -276,7 +280,7 @@ export default function AdminDashboard() {
                   type="monotone"
                   dataKey="deposits"
                   name="Depósitos"
-                  stroke="#10b981"
+                  stroke="#059669"
                   fillOpacity={1}
                   fill="url(#colorDeposits)"
                   strokeWidth={2}
@@ -285,7 +289,7 @@ export default function AdminDashboard() {
                   type="monotone"
                   dataKey="withdrawals"
                   name="Retiros"
-                  stroke="#ef4444"
+                  stroke="#dc2626"
                   fillOpacity={1}
                   fill="url(#colorWithdrawals)"
                   strokeWidth={2}
@@ -294,7 +298,7 @@ export default function AdminDashboard() {
                   type="monotone"
                   dataKey="transfers"
                   name="Transferencias"
-                  stroke="#38bdf8"
+                  stroke="#09090b"
                   fillOpacity={1}
                   fill="url(#colorTransfers)"
                   strokeWidth={2}
@@ -330,10 +334,10 @@ export default function AdminDashboard() {
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#0f172a",
-                    borderColor: "#334155",
+                    backgroundColor: darkMode ? "#18181b" : "#ffffff",
+                    borderColor: darkMode ? "#27272a" : "#e4e4e7",
                     borderRadius: "8px",
-                    color: "#f8fafc",
+                    color: darkMode ? "#fafafa" : "#09090b",
                     fontSize: "12px",
                   }}
                   formatter={(val) => [`$${Number(val).toLocaleString()}`, ""]}
@@ -356,15 +360,15 @@ export default function AdminDashboard() {
           <div className="chart-viewport">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={typeBreakdown} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-                <XAxis dataKey="type" stroke="#94a3b8" fontSize={11} />
-                <YAxis stroke="#94a3b8" fontSize={11} tickFormatter={(val) => `$${val}`} />
+                <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? "#27272a" : "#f4f4f5"} />
+                <XAxis dataKey="type" stroke="#71717a" fontSize={11} />
+                <YAxis stroke="#71717a" fontSize={11} tickFormatter={(val) => `$${val}`} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#0f172a",
-                    borderColor: "#334155",
+                    backgroundColor: darkMode ? "#18181b" : "#ffffff",
+                    borderColor: darkMode ? "#27272a" : "#e4e4e7",
                     borderRadius: "8px",
-                    color: "#f8fafc",
+                    color: darkMode ? "#fafafa" : "#09090b",
                     fontSize: "12px",
                   }}
                   formatter={(val, name) => [
@@ -373,7 +377,7 @@ export default function AdminDashboard() {
                   ]}
                 />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: "12px" }} />
-                <Bar dataKey="volume" name="Volumen ($)" fill="#38bdf8" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="volume" name="Volumen ($)" fill="#0284c7" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -385,18 +389,15 @@ export default function AdminDashboard() {
               <h2>Alertas de Seguridad</h2>
               <span>Monitoreo de anomalías</span>
             </div>
-            <Link
-              to="/admin/database"
-              style={{ fontSize: "var(--text-xs)", color: "var(--primary)", fontWeight: 600 }}
-            >
-              Ver todos →
+            <Link to="/admin/database" className="admin-card-link">
+              Ver todos
             </Link>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-3)", overflowY: "auto", maxHeight: "280px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px", overflowY: "auto", maxHeight: "260px" }}>
             {incidents.length === 0 ? (
-              <div style={{ textAlign: "center", color: "var(--text-muted)", padding: "var(--space-6)" }}>
-                <CheckCircle style={{ width: 32, height: 32, color: "var(--success)", margin: "0 auto var(--space-2)" }} />
+              <div style={{ textAlign: "center", color: "#71717a", padding: "36px 16px" }}>
+                <CheckCircle size={28} style={{ color: "#059669", margin: "0 auto 8px", display: "block" }} />
                 No hay incidentes de seguridad registrados.
               </div>
             ) : (
@@ -404,13 +405,13 @@ export default function AdminDashboard() {
                 <div
                   key={inc.id}
                   style={{
-                    padding: "var(--space-3)",
-                    backgroundColor: "var(--bg-surface)",
-                    borderRadius: "var(--radius-md)",
-                    border: "1px solid var(--border-subtle)",
+                    padding: "12px 14px",
+                    backgroundColor: darkMode ? "#18181b" : "#fafafa",
+                    borderRadius: "10px",
+                    border: `1px solid ${darkMode ? "#27272a" : "#e4e4e7"}`,
                     display: "flex",
                     flexDirection: "column",
-                    gap: "var(--space-2)",
+                    gap: "6px",
                   }}
                 >
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -421,24 +422,25 @@ export default function AdminDashboard() {
                     >
                       {inc.severity}
                     </span>
-                    <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>
+                    <span style={{ fontSize: "11px", color: "#71717a" }}>
                       {inc.createdAt ? new Date(inc.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : ""}
                     </span>
                   </div>
-                  <div style={{ fontSize: "var(--text-xs)", color: "var(--text-primary)", fontWeight: 500 }}>
+                  <div style={{ fontSize: "0.825rem", color: darkMode ? "#fafafa" : "#09090b", fontWeight: 600 }}>
                     {inc.description}
                   </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 4 }}>
-                    <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 2 }}>
+                    <span style={{ fontSize: "11px", color: "#71717a" }}>
                       Objetivo: {inc.targetUserEmail || "Sistema"}
                     </span>
                     {inc.resolved ? (
-                      <span style={{ fontSize: "11px", color: "var(--success)", fontWeight: 600, display: "flex", alignItems: "center", gap: 3 }}>
-                        <CheckCircle style={{ width: 12, height: 12 }} /> Resuelto
+                      <span style={{ fontSize: "11px", color: "#059669", fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}>
+                        <CheckCircle size={12} /> Resuelto
                       </span>
                     ) : (
                       <button
-                        className="action-btn unfreeze"
+                        type="button"
+                        className="btn btn-primary btn-sm"
                         onClick={() => handleResolveIncident(inc.id)}
                         disabled={resolvingId === inc.id}
                         style={{ height: 26, fontSize: "10px", padding: "0 8px" }}
@@ -455,11 +457,11 @@ export default function AdminDashboard() {
       </div>
 
       <div className="admin-content-box">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-4)" }}>
-          <h2 style={{ fontSize: "var(--text-md)", fontWeight: 600, color: "var(--text-primary)" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+          <h2 style={{ fontSize: "1.05rem", fontWeight: 700, color: darkMode ? "#fafafa" : "#09090b", margin: 0 }}>
             Registro de Auditoría Reciente
           </h2>
-          <span style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>
+          <span style={{ fontSize: "0.8rem", color: "#71717a" }}>
             Trazabilidad y operaciones de superusuario
           </span>
         </div>
@@ -478,20 +480,20 @@ export default function AdminDashboard() {
             <tbody>
               {auditLogs.length === 0 ? (
                 <tr>
-                  <td colSpan={5} style={{ textAlign: "center", color: "var(--text-muted)" }}>
+                  <td colSpan={5} style={{ textAlign: "center", color: "#71717a", padding: "32px 16px" }}>
                     No hay registros de auditoría disponibles.
                   </td>
                 </tr>
               ) : (
                 paginatedAuditLogs.map((log) => (
                   <tr key={log.id}>
-                    <td>#{log.id}</td>
+                    <td style={{ fontFamily: "monospace", fontWeight: 600, color: "#71717a" }}>#{log.id}</td>
                     <td>
                       <span className="status-badge admin">{log.action}</span>
                     </td>
-                    <td style={{ fontWeight: 500 }}>{log.performedBy}</td>
-                    <td style={{ color: "var(--text-secondary)" }}>{log.description}</td>
-                    <td style={{ color: "var(--text-muted)", fontSize: "var(--text-xs)", whiteSpace: "nowrap" }}>
+                    <td style={{ fontWeight: 600 }}>{log.performedBy}</td>
+                    <td style={{ color: "#52525b" }}>{log.description}</td>
+                    <td style={{ color: "#71717a", fontSize: "0.78rem", whiteSpace: "nowrap" }}>
                       {log.timeStamp ? new Date(log.timeStamp).toLocaleString() : "N/A"}
                     </td>
                   </tr>

@@ -20,9 +20,8 @@ import {
 } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import { getUserTier } from "./tierUtils";
-import { DynamicMountainsBg } from "./components";
 
-export default function Sidebar({ active }) {
+export default function Sidebar({ active, isCollapsed, onToggleCollapse }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -35,9 +34,7 @@ export default function Sidebar({ active }) {
       if (saved) {
         setCurrentUser(JSON.parse(saved));
       }
-    } catch (e) {
-      console.error("Error reading user from localStorage:", e);
-    }
+    } catch (e) {}
   }, []);
 
   const handleLogout = () => {
@@ -46,7 +43,6 @@ export default function Sidebar({ active }) {
     navigate("/login");
   };
 
-  // Determinar pestaña activa si no se pasó como prop
   const currentPath = location.pathname;
   const currentActive =
     active ||
@@ -109,13 +105,40 @@ export default function Sidebar({ active }) {
 
   return (
     <>
-      {/* Barra superior móvil (< 1024px) */}
+      {isCollapsed && (
+        <button
+          type="button"
+          onClick={onToggleCollapse}
+          style={{
+            position: "fixed",
+            top: "16px",
+            left: "16px",
+            zIndex: 1000,
+            background: "var(--bg-card, #ffffff)",
+            border: "1px solid var(--border-subtle, #e4e4e7)",
+            color: "var(--text-primary, #09090b)",
+            width: "36px",
+            height: "36px",
+            borderRadius: "8px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+          }}
+          aria-label="Mostrar menú"
+        >
+          <ChevronRight size={18} />
+        </button>
+      )}
+
       <div className="client-mobile-bar">
         <div className="client-brand-compact">
-          <div className="client-logo-mark">
-            <span className="logo-neon-dot" />
-            <span className="logo-letter">N</span>
-          </div>
+          <img
+            src="/logo_trimmed.png"
+            alt="NeoBank"
+            style={{ height: "28px", width: "auto", background: "transparent" }}
+          />
           <span className="client-brand-text">NEOBANK</span>
           <span className="client-pill-tag">PERSONAL</span>
         </div>
@@ -132,7 +155,6 @@ export default function Sidebar({ active }) {
         </div>
       </div>
 
-      {/* Backdrop overlay para pantallas móviles */}
       {mobileOpen && (
         <div
           className="client-sidebar-overlay"
@@ -141,12 +163,7 @@ export default function Sidebar({ active }) {
         />
       )}
 
-      {/* Barra Lateral Principal del Cliente */}
       <aside className={`client-sidebar ${mobileOpen ? "open" : ""}`}>
-        {/* SVG de Montañas Dinámicas en el Fondo */}
-        <DynamicMountainsBg />
-
-        {/* Cabecera de Marca con SVG Ultra Nítido */}
         <div className="client-sidebar-header">
           <div className="client-brand-top-row">
             <Link
@@ -155,63 +172,11 @@ export default function Sidebar({ active }) {
               onClick={() => setMobileOpen(false)}
             >
               <div className="client-brand-visual">
-                <div className="client-brand-icon">
-                  <svg
-                    width="28"
-                    height="28"
-                    viewBox="0 0 32 32"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M6 8C6 6.89543 6.89543 6 8 6H24C25.1046 6 26 6.89543 26 8V11C26 12.1046 25.1046 13 24 13H8C6.89543 13 6 12.1046 6 11V8Z"
-                      fill="url(#clientGrad1)"
-                    />
-                    <path
-                      d="M6 16C6 14.8954 6.89543 14 8 14H18C19.1046 14 20 14.8954 20 16V19C20 20.1046 19.1046 21 18 21H8C6.89543 21 6 20.1046 6 19V16Z"
-                      fill="url(#clientGrad2)"
-                    />
-                    <path
-                      d="M6 24C6 22.8954 6.89543 22 8 22H24C25.1046 22 26 22.8954 26 24V25C26 25.5523 25.5523 26 25 26H7C6.44772 26 6 25.5523 6 25V24Z"
-                      fill="url(#clientGrad3)"
-                    />
-                    <defs>
-                      <linearGradient
-                        id="clientGrad1"
-                        x1="6"
-                        y1="6"
-                        x2="26"
-                        y2="13"
-                        gradientUnits="userSpaceOnUse"
-                      >
-                        <stop stopColor="#38bdf8" />
-                        <stop offset="1" stopColor="#0284c7" />
-                      </linearGradient>
-                      <linearGradient
-                        id="clientGrad2"
-                        x1="6"
-                        y1="14"
-                        x2="20"
-                        y2="21"
-                        gradientUnits="userSpaceOnUse"
-                      >
-                        <stop stopColor="#38bdf8" />
-                        <stop offset="1" stopColor="#0ea5e9" />
-                      </linearGradient>
-                      <linearGradient
-                        id="clientGrad3"
-                        x1="6"
-                        y1="22"
-                        x2="26"
-                        y2="26"
-                        gradientUnits="userSpaceOnUse"
-                      >
-                        <stop stopColor="#0ea5e9" />
-                        <stop offset="1" stopColor="#38bdf8" />
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                </div>
+                <img
+                  src="/logo_trimmed.png"
+                  alt="NeoBank"
+                  style={{ height: "32px", width: "auto", background: "transparent", display: "block" }}
+                />
                 <div className="client-brand-info">
                   <span className="client-brand-title">NEOBANK</span>
                   <span className="client-brand-tagline">BANCA PERSONAL</span>
@@ -223,25 +188,34 @@ export default function Sidebar({ active }) {
               type="button"
               className="sidebar-collapse-btn"
               aria-label="Colapsar menú lateral"
-              onClick={() => setMobileOpen(false)}
+              onClick={onToggleCollapse}
             >
               <ChevronLeft size={16} />
             </button>
           </div>
 
-          {/* Badge de Estado de Cuenta */}
           <div className="client-system-status">
             <div className="status-indicator-left">
-              <span className="status-indicator-dot" />
-              <span className="status-indicator-text">Cuenta Activa</span>
+              <span
+                style={{
+                  width: "7px",
+                  height: "7px",
+                  borderRadius: "50%",
+                  backgroundColor: "#10b981",
+                  display: "inline-block",
+                }}
+              />
+              <span>Cuenta Activa</span>
             </div>
             <span
-              className="status-env-pill"
               style={{
-                backgroundColor: "rgba(255, 255, 255, 0.08)",
-                color: "#e2e8f0",
-                borderColor: "rgba(255, 255, 255, 0.14)",
+                fontSize: "10px",
                 fontWeight: 700,
+                padding: "2px 8px",
+                borderRadius: "9999px",
+                backgroundColor: "#f4f4f5",
+                color: "#09090b",
+                border: "1px solid #e4e4e7",
               }}
             >
               {userTier?.shortName || "GOLD"}
@@ -249,31 +223,30 @@ export default function Sidebar({ active }) {
           </div>
         </div>
 
-        {/* Menú de Navegación por Secciones */}
         <nav className="client-nav" aria-label="Navegación principal">
           {navSections.map((section, sIdx) => (
             <div key={sIdx} className="client-nav-section">
               <span className="client-section-heading">{section.title}</span>
               <ul className="client-menu-list">
                 {section.items.map((item) => {
-                  const active = currentActive === item.id;
+                  const isActive = currentActive === item.id;
                   const Icon = item.icon;
                   return (
                     <li
                       key={item.id}
-                      className={`client-menu-item ${active ? "active" : ""}`}
+                      className={`client-menu-item ${isActive ? "active" : ""}`}
                     >
                       <Link
                         to={item.path}
                         onClick={() => setMobileOpen(false)}
                         className="client-menu-link"
-                        aria-current={active ? "page" : undefined}
+                        aria-current={isActive ? "page" : undefined}
                       >
                         <div className="client-menu-icon-wrap">
-                          <Icon size={19} className="client-nav-icon" />
+                          <Icon size={18} className="client-nav-icon" />
                         </div>
                         <span className="client-menu-label">{item.label}</span>
-                        {active && (
+                        {isActive && (
                           <ChevronRight size={14} className="client-active-arrow" />
                         )}
                       </Link>
@@ -284,10 +257,9 @@ export default function Sidebar({ active }) {
             </div>
           ))}
 
-          {/* Acceso Rápido al Panel Admin si el usuario tiene rol ADMIN */}
           {isAdmin && (
             <div className="client-nav-section">
-              <span className="client-section-heading">Superusuario</span>
+              <span className="client-section-heading">Administración</span>
               <ul className="client-menu-list">
                 <li className="client-menu-item">
                   <Link
@@ -296,9 +268,9 @@ export default function Sidebar({ active }) {
                     className="client-menu-link admin-switch-link"
                   >
                     <div className="client-menu-icon-wrap">
-                      <ShieldCheck size={19} className="client-nav-icon" style={{ color: "#38bdf8" }} />
+                      <ShieldCheck size={18} className="client-nav-icon" />
                     </div>
-                    <span className="client-menu-label" style={{ color: "#7dd3fc", fontWeight: 600 }}>
+                    <span className="client-menu-label" style={{ fontWeight: 600 }}>
                       Panel Administrador
                     </span>
                     <span className="admin-shortcut-tag">ADMIN</span>
@@ -309,7 +281,6 @@ export default function Sidebar({ active }) {
           )}
         </nav>
 
-        {/* Pie de Barra Lateral: Perfil del Usuario & Theme Switcher */}
         <div className="client-sidebar-footer">
           <div className="client-user-card">
             <Link to="/account" className="client-user-info-link" title="Ver mi cuenta">
