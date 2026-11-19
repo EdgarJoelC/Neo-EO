@@ -39,10 +39,10 @@ export default function Vaults() {
     try {
       setLoading(true);
       const [vaultsRes, userRes] = await Promise.all([
-        axios.get("http://localhost:8080/api/vaults", {
+        axios.get("/api/vaults", {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        axios.get("http://localhost:8080/api/auth/me", {
+        axios.get("/api/auth/me", {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -80,7 +80,7 @@ export default function Vaults() {
 
     try {
       const res = await axios.post(
-        "http://localhost:8080/api/vaults",
+        "/api/vaults",
         {
           name: vaultName.trim(),
           targetAmount: parsedTarget,
@@ -116,7 +116,7 @@ export default function Vaults() {
 
     try {
       const res = await axios.post(
-        `http://localhost:8080/api/vaults/${selectedVault.id}/deposit`,
+        `/api/vaults/${selectedVault.id}/deposit`,
         { amount: parsed },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -156,7 +156,7 @@ export default function Vaults() {
 
     try {
       const res = await axios.post(
-        `http://localhost:8080/api/vaults/${selectedVault.id}/withdraw`,
+        `/api/vaults/${selectedVault.id}/withdraw`,
         { amount: parsed },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -181,7 +181,7 @@ export default function Vaults() {
   const handleDeleteVault = async () => {
     try {
       await axios.delete(
-        `http://localhost:8080/api/vaults/${selectedVault.id}`,
+        `/api/vaults/${selectedVault.id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 

@@ -4,6 +4,7 @@ import com.neobank.backend.DTO.UserRequestDTO;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
@@ -11,12 +12,18 @@ import java.util.Date;
 
 @Service
 public class JwtService {
-    private static final long EXPIRATION_TIME = 86400000; // 1 day
-    private static final String SECRET = "my-very-secret-key-that-is-at-least-256-bits-long!!!";
 
+    private final String secret;
+    private final long expirationTime;
+
+    public JwtService(@Value("${neobank.jwt.secret}") String secret,
+                      @Value("${neobank.jwt.expiration:86400000}") long expirationTime) {
+        this.secret = secret;
+        this.expirationTime = expirationTime;
+    }
 
     private Key getSigningKey(){
-        return Keys.hmacShaKeyFor(SECRET.getBytes());
+        return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
     public String generateToken(String email, String role) {
@@ -24,7 +31,7 @@ public class JwtService {
                 .setSubject(email)
                 .claim("role", role)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

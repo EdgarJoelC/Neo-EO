@@ -40,7 +40,7 @@ export default function Transactions() {
   useEffect(() => {
     if (!token) return;
     axios
-      .get("http://localhost:8080/api/auth/me", {
+      .get("/api/auth/me", {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setCurrentUser(res.data))
@@ -51,7 +51,7 @@ export default function Transactions() {
     if (!user || !token) return;
     try {
       const res = await axios.get(
-        `http://localhost:8080/api/transactions/user/${user.id}`,
+        `/api/transactions/user/${user.id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -86,7 +86,7 @@ export default function Transactions() {
   const fetchFrequentContacts = async () => {
     if (!token) return;
     try {
-      const res = await axios.get("http://localhost:8080/api/users/contacts", {
+      const res = await axios.get("/api/users/contacts", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setFrequentContacts(res.data || []);
@@ -119,7 +119,7 @@ export default function Transactions() {
     searchTimeoutRef.current = setTimeout(async () => {
       try {
         const res = await axios.get(
-          `http://localhost:8080/api/users/search?q=${encodeURIComponent(
+          `/api/users/search?q=${encodeURIComponent(
             query.trim()
           )}`,
           { headers: { Authorization: `Bearer ${token}` } }
@@ -174,7 +174,7 @@ export default function Transactions() {
       };
 
       const res = await axios.post(
-        "http://localhost:8080/api/transactions",
+        "/api/transactions",
         dto,
         {
           headers: {

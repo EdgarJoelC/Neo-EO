@@ -19,7 +19,7 @@ import "./Dashboard.css";
 import "./LightMode.css";
 import "./Crypto.css";
 
-const API = "http://localhost:8080";
+const API = "";
 
 const DEFAULT_COINS = [
   { id: "bitcoin", symbol: "BTC", name: "Bitcoin" },

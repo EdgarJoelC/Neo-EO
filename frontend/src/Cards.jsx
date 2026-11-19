@@ -61,7 +61,7 @@ export default function Cards() {
     }
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:8080/api/cards", {
+      const res = await axios.get("/api/cards", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = Array.isArray(res.data) ? res.data : [];
@@ -107,7 +107,7 @@ export default function Cards() {
     setFeedbackError("");
     try {
       const res = await axios.post(
-        "http://localhost:8080/api/cards",
+        "/api/cards",
         {
           cardType: newCardType,
           color: newCardColor,
@@ -135,8 +135,8 @@ export default function Cards() {
     try {
       const isFrozen = selectedCard.status === "FROZEN";
       const endpoint = isFrozen
-        ? `http://localhost:8080/api/cards/${selectedCard.id}/unfreeze`
-        : `http://localhost:8080/api/cards/${selectedCard.id}/freeze`;
+        ? `/api/cards/${selectedCard.id}/unfreeze`
+        : `/api/cards/${selectedCard.id}/freeze`;
       await axios.patch(endpoint, {}, { headers: { Authorization: `Bearer ${token}` } });
       showSuccess(isFrozen ? "Tarjeta desbloqueada y lista para usar." : "Tarjeta congelada temporalmente.");
       await fetchCards();
@@ -152,7 +152,7 @@ export default function Cards() {
     setActionLoading(true);
     try {
       await axios.patch(
-        `http://localhost:8080/api/cards/${selectedCard.id}/toggle-online`,
+        `/api/cards/${selectedCard.id}/toggle-online`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -171,7 +171,7 @@ export default function Cards() {
     setActionLoading(true);
     try {
       await axios.post(
-        `http://localhost:8080/api/cards/${selectedCard.id}/regenerate`,
+        `/api/cards/${selectedCard.id}/regenerate`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -190,7 +190,7 @@ export default function Cards() {
     setActionLoading(true);
     try {
       await axios.patch(
-        `http://localhost:8080/api/cards/${selectedCard.id}/limits`,
+        `/api/cards/${selectedCard.id}/limits`,
         {
           dailyLimit: parseFloat(editDailyLimit) || selectedCard.dailyLimit,
           monthlyLimit: parseFloat(editMonthlyLimit) || selectedCard.monthlyLimit,
@@ -221,7 +221,7 @@ export default function Cards() {
     setActionLoading(true);
     try {
       await axios.patch(
-        `http://localhost:8080/api/cards/${selectedCard.id}/pin`,
+        `/api/cards/${selectedCard.id}/pin`,
         { pin: editPin },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -241,7 +241,7 @@ export default function Cards() {
     if (!selectedCard) return;
     setActionLoading(true);
     try {
-      await axios.delete(`http://localhost:8080/api/cards/${selectedCard.id}`, {
+      await axios.delete(`/api/cards/${selectedCard.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setShowDeleteModal(false);

@@ -36,8 +36,8 @@ export default function AdminReports() {
     try {
       setLoading(true);
       const [reportRes, logsRes] = await Promise.all([
-        axios.get("http://localhost:8080/api/admin/reports", { headers: getHeaders() }),
-        axios.get("http://localhost:8080/api/audit-logs", { headers: getHeaders() }),
+        axios.get("/api/admin/reports", { headers: getHeaders() }),
+        axios.get("/api/audit-logs", { headers: getHeaders() }),
       ]);
       setReport(reportRes.data);
       setAuditLogs(logsRes.data || []);
@@ -60,7 +60,7 @@ export default function AdminReports() {
   const exportFullReport = async () => {
     setExportingFull(true);
     try {
-      const res = await axios.get("http://localhost:8080/api/admin/reports/export", {
+      const res = await axios.get("/api/admin/reports/export", {
         headers: getHeaders(),
         responseType: "blob",
       });
@@ -86,7 +86,7 @@ export default function AdminReports() {
     setExportingUser(true);
     try {
       const res = await axios.get(
-        `http://localhost:8080/api/admin/reports/user/${userId.trim()}/export`,
+        `/api/admin/reports/user/${userId.trim()}/export`,
         {
           headers: getHeaders(),
           responseType: "blob",

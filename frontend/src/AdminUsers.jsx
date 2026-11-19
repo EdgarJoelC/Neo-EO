@@ -34,7 +34,7 @@ export default function AdminUsers() {
     if (!token) return;
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:8080/api/users", {
+      const res = await axios.get("/api/users", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Cache-Control": "no-cache",
@@ -80,7 +80,7 @@ export default function AdminUsers() {
     try {
       if (modalType === "freeze") {
         await axios.patch(
-          `http://localhost:8080/api/users/${selectedUser.id}/freeze`,
+          `/api/users/${selectedUser.id}/freeze`,
           {},
           {
             headers: {
@@ -97,7 +97,7 @@ export default function AdminUsers() {
         closeModal();
       } else if (modalType === "unfreeze") {
         await axios.patch(
-          `http://localhost:8080/api/users/${selectedUser.id}/unfreeze`,
+          `/api/users/${selectedUser.id}/unfreeze`,
           {},
           {
             headers: {
@@ -114,7 +114,7 @@ export default function AdminUsers() {
         closeModal();
       } else if (modalType === "delete") {
         await axios.delete(
-          `http://localhost:8080/api/users/${selectedUser.id}`,
+          `/api/users/${selectedUser.id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -139,7 +139,7 @@ export default function AdminUsers() {
         setAdjustError("");
 
         const res = await axios.post(
-          `http://localhost:8080/admin/users/${selectedUser.id}/adjust-balance`,
+          `/api/admin/users/${selectedUser.id}/adjust-balance`,
           {
             amount: parseFloat(adjustAmount),
             type: adjustType,

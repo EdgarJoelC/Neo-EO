@@ -60,7 +60,10 @@ export default function AdminLayout({ children }) {
       title: "Accesos Externos",
       items: [
         { path: "/dashboard", label: "Portal Cliente", icon: ExternalLink, external: true },
-        { path: "http://localhost:8080/h2-console", label: "Consola H2", icon: Terminal, external: true, rawHref: true },
+        // La consola H2 solo existe en desarrollo local; en la nube la base es PostgreSQL.
+        ...(window.location.hostname === "localhost"
+          ? [{ path: "http://localhost:8080/h2-console", label: "Consola H2", icon: Terminal, external: true, rawHref: true }]
+          : []),
       ],
     },
   ];

@@ -1,0 +1,39 @@
+# ===========================================================================
+#  NeoBank - definicion del servicio para Render
+#
+#  Render solo lee este archivo cuando el servicio se crea como BLUEPRINT
+#  (New > Blueprint). Si se crea como Web Service normal, las variables se
+#  definen a mano en el panel: Environment > Add Environment Variable.
+#
+#  Las marcadas con sync:false NO se escriben aqui: se cargan en el panel.
+#  Ninguna credencial vive en el repositorio.
+# ===========================================================================
+services:
+  - type: web
+    name: neobank-backend
+    runtime: docker
+    plan: free
+    region: oregon
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: nube
+
+      # Cadena JDBC de Neon. Formato:
+      #   jdbc:postgresql://HOST/BASE?sslmode=require
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_USER
+        sync: false
+      - key: DATABASE_PASSWORD
+        sync: false
+
+      # Clave de firma de los tokens. Render la genera sola.
+      - key: NEOBANK_JWT_SECRET
+        generateValue: true
+
+      # URL del frontend en Vercel, SIN barra al final.
+      - key: NEOBANK_CORS
+        sync: false

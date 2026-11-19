@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   ArrowDownLeft,
   ArrowUpRight,
@@ -50,7 +50,16 @@ export default function Dashboard() {
   const [currentUser, setCurrentUser] = useState(null);
 
   const token = localStorage.getItem("token");
-  const user = JSON.parse(localStorage.getItem("user"));
+  // JSON.parse devuelve un objeto distinto en cada render. Como este objeto es
+  // dependencia del useEffect de abajo, React lo veia siempre como cambiado y
+  // reejecutaba las peticiones sin parar. Se parsea una sola vez por montaje.
+  const user = useMemo(() => {
+    try {
+      return JSON.parse(localStorage.getItem("user"));
+    } catch {
+      return null;
+    }
+  }, []);
 
   const copyToClipboard = (text, field) => {
     if (!text) return;
@@ -62,7 +71,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (!user || !token) return;
 
-    fetch(`http://localhost:8080/api/transactions/user/${user.id}`, {
+    fetch(`/api/transactions/user/${user.id}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {
@@ -114,7 +123,7 @@ export default function Dashboard() {
       })
       .catch(() => setTransactions([]));
 
-    fetch("http://localhost:8080/api/auth/me", {
+    fetch("/api/auth/me", {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {
@@ -131,7 +140,7 @@ export default function Dashboard() {
       })
       .catch(() => {});
 
-    fetch("http://localhost:8080/api/vaults", {
+    fetch("/api/vaults", {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {
@@ -141,7 +150,7 @@ export default function Dashboard() {
       .then((data) => setVaults(Array.isArray(data) ? data : []))
       .catch(() => setVaults([]));
 
-    fetch("http://localhost:8080/api/cards", {
+    fetch("/api/cards", {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {
@@ -153,7 +162,7 @@ export default function Dashboard() {
   }, [token, user]);
 
   const confirmNewCard = () => {
-    fetch("http://localhost:8080/api/cards", {
+    fetch("/api/cards", {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
     })

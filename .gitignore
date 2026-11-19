@@ -32,3 +32,14 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Base de datos H2 local (se regenera sola al arrancar) ###
+backend/data/
+
+### Compilacion del frontend ###
+frontend/build/
+frontend/node_modules/
+
+### Variables de entorno locales ###
+.env
+.env.local

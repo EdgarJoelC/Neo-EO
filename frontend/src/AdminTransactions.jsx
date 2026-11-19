@@ -28,7 +28,7 @@ export default function AdminTransactions() {
     try {
       setLoading(true);
       const res = await axios.get(
-        "http://localhost:8080/admin/recent-transactions?limit=100",
+        "/api/admin/recent-transactions?limit=100",
         { headers: { Authorization: `Bearer ${token}` } }
       );
 

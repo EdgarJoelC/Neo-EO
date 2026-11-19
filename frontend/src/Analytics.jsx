@@ -88,14 +88,14 @@ export default function Analytics() {
     try {
       setLoading(true);
       const [catRes, trendRes, budgetRes] = await Promise.all([
-        axios.get("http://localhost:8080/api/analytics/spending-by-category", {
+        axios.get("/api/analytics/spending-by-category", {
           params: { month: selectedMonth, year: selectedYear },
           headers: { Authorization: `Bearer ${token}` },
         }),
-        axios.get("http://localhost:8080/api/analytics/monthly-trend", {
+        axios.get("/api/analytics/monthly-trend", {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        axios.get("http://localhost:8080/api/budgets", {
+        axios.get("/api/budgets", {
           params: { month: selectedMonth, year: selectedYear },
           headers: { Authorization: `Bearer ${token}` },
         }),
@@ -139,7 +139,7 @@ export default function Analytics() {
     setActionLoading(true);
     try {
       await axios.post(
-        "http://localhost:8080/api/budgets",
+        "/api/budgets",
         {
           category: budgetCategory,
           monthlyLimit: parseFloat(budgetLimit),

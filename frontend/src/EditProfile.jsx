@@ -39,7 +39,7 @@ export default function EditProfile() {
       if (!token) return;
 
       try {
-        const res = await axios.get("http://localhost:8080/api/auth/me", {
+        const res = await axios.get("/api/auth/me", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -62,7 +62,7 @@ export default function EditProfile() {
     if (!token) return;
 
     try {
-      const res = await axios.put("http://localhost:8080/api/auth/me", user, {
+      const res = await axios.put("/api/auth/me", user, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",

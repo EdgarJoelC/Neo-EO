@@ -56,16 +56,16 @@ export default function AdminDashboard() {
   const fetchOverviewData = async () => {
     if (!token) return;
     try {
-      const res = await axios.get("http://localhost:8080/admin/overview", {
+      const res = await axios.get("/api/admin/overview", {
         headers: getHeaders(),
       });
       setOverview(res.data);
     } catch (err) {
       try {
         const [balRes, usersRes, txRes] = await Promise.all([
-          axios.get("http://localhost:8080/admin/total-balance", { headers: getHeaders() }),
-          axios.get("http://localhost:8080/api/users", { headers: getHeaders() }),
-          axios.get("http://localhost:8080/admin/recent-transactions?limit=10", { headers: getHeaders() }),
+          axios.get("/api/admin/total-balance", { headers: getHeaders() }),
+          axios.get("/api/users", { headers: getHeaders() }),
+          axios.get("/api/admin/recent-transactions?limit=10", { headers: getHeaders() }),
         ]);
         setOverview({
           kpis: {
@@ -114,7 +114,7 @@ export default function AdminDashboard() {
     setResolvingId(incidentId);
     try {
       await axios.patch(
-        `http://localhost:8080/admin/security-incidents/${incidentId}/resolve`,
+        `/api/admin/security-incidents/${incidentId}/resolve`,
         { notes: "Resuelto mediante panel ejecutivo de supervisión" },
         { headers: getHeaders() }
       );
@@ -186,6 +186,8 @@ export default function AdminDashboard() {
             <Database size={15} />
             <span>Explorador BD</span>
           </Link>
+          {/* La consola H2 solo existe en desarrollo local; en la nube la base es PostgreSQL. */}
+          {window.location.hostname === "localhost" && (
           <a
             href="http://localhost:8080/h2-console"
             target="_blank"
@@ -196,6 +198,7 @@ export default function AdminDashboard() {
             <ExternalLink size={15} />
             <span>Consola H2</span>
           </a>
+          )}
         </div>
       </div>
 

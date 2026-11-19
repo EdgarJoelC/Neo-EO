@@ -93,7 +93,7 @@ export default function Account() {
 
     const fetchUser = async () => {
       try {
-        const res = await axios.get("http://localhost:8080/api/auth/me", {
+        const res = await axios.get("/api/auth/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUser(res.data);
@@ -128,7 +128,7 @@ export default function Account() {
     setIsSaving(true);
     try {
       const res = await axios.put(
-        "http://localhost:8080/api/auth/me",
+        "/api/auth/me",
         editForm,
         {
           headers: {
@@ -160,7 +160,7 @@ export default function Account() {
 
     try {
       await axios.patch(
-        "http://localhost:8080/auth/change-password",
+        "/api/auth/change-password",
         {
           oldPassword: passwordForm.oldPassword,
           newPassword: passwordForm.newPassword,

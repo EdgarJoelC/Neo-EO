@@ -54,7 +54,7 @@ export default function AdminDatabase() {
     if (!token) return;
     setLoadingTables(true);
     try {
-      const res = await axios.get("http://localhost:8080/api/admin/database/overview", {
+      const res = await axios.get("/api/admin/database/overview", {
         headers: getHeaders(),
       });
       const tableList = res.data?.tables || (Array.isArray(res.data) ? res.data : []);
@@ -77,7 +77,7 @@ export default function AdminDatabase() {
     setLoadingData(true);
     try {
       const res = await axios.get(
-        `http://localhost:8080/api/admin/database/tables/${tableName}`,
+        `/api/admin/database/tables/${tableName}`,
         {
           headers: getHeaders(),
           params: { page, size: 20, search },
@@ -118,7 +118,7 @@ export default function AdminDatabase() {
 
     try {
       const res = await axios.post(
-        "http://localhost:8080/api/admin/database/query",
+        "/api/admin/database/query",
         { query: q },
         { headers: getHeaders() }
       );

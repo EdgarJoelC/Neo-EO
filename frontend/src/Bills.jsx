@@ -69,10 +69,10 @@ export default function Bills() {
     try {
       setLoading(true);
       const [billsRes, userRes] = await Promise.all([
-        axios.get("http://localhost:8080/api/scheduled-payments", {
+        axios.get("/api/scheduled-payments", {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        axios.get("http://localhost:8080/api/auth/me", {
+        axios.get("/api/auth/me", {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -135,7 +135,7 @@ export default function Bills() {
     setActionLoading(true);
     try {
       await axios.post(
-        "http://localhost:8080/api/scheduled-payments",
+        "/api/scheduled-payments",
         {
           title,
           serviceType,
@@ -175,7 +175,7 @@ export default function Bills() {
     setActionLoading(true);
     try {
       await axios.post(
-        `http://localhost:8080/api/scheduled-payments/${id}/execute`,
+        `/api/scheduled-payments/${id}/execute`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -192,7 +192,7 @@ export default function Bills() {
     setActionLoading(true);
     try {
       const res = await axios.patch(
-        `http://localhost:8080/api/scheduled-payments/${id}/toggle-pause`,
+        `/api/scheduled-payments/${id}/toggle-pause`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -213,7 +213,7 @@ export default function Bills() {
     if (!window.confirm("¿Seguro que deseas cancelar este servicio programado?")) return;
     setActionLoading(true);
     try {
-      await axios.delete(`http://localhost:8080/api/scheduled-payments/${id}`, {
+      await axios.delete(`/api/scheduled-payments/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       showSuccess("Servicio programado eliminado.");

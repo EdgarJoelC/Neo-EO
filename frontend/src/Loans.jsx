@@ -78,10 +78,10 @@ export default function Loans() {
     try {
       setLoading(true);
       const [loansRes, userRes] = await Promise.all([
-        axios.get("http://localhost:8080/api/loans", {
+        axios.get("/api/loans", {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        axios.get("http://localhost:8080/api/auth/me", {
+        axios.get("/api/auth/me", {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -118,7 +118,7 @@ export default function Loans() {
     setFeedbackError("");
     try {
       await axios.post(
-        "http://localhost:8080/api/loans/apply",
+        "/api/loans/apply",
         {
           amount: parseFloat(amount),
           termMonths: parseInt(termMonths),
@@ -148,7 +148,7 @@ export default function Loans() {
     setActionLoading(true);
     try {
       await axios.post(
-        `http://localhost:8080/api/loans/${selectedLoan.id}/pay`,
+        `/api/loans/${selectedLoan.id}/pay`,
         { amount: paymentToApply },
         { headers: { Authorization: `Bearer ${token}` } }
       );

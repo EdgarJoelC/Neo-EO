@@ -85,7 +85,7 @@ export default function Settings() {
 
     try {
       await axios.patch(
-        "http://localhost:8080/auth/change-password",
+        "/api/auth/change-password",
         { oldPassword, newPassword },
         {
           headers: {

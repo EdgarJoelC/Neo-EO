@@ -15,7 +15,7 @@ export default function NotificationBell() {
 
     const fetchNotifications = async () => {
       try {
-        const res = await axios.get("http://localhost:8080/api/notifications", {
+        const res = await axios.get("/api/notifications", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setNotifications(res.data || []);
@@ -52,7 +52,7 @@ export default function NotificationBell() {
         if (!n.read) {
           axios
             .patch(
-              `http://localhost:8080/api/notifications/${n.id}/read`,
+              `/api/notifications/${n.id}/read`,
               {},
               { headers: { Authorization: `Bearer ${token}` } }
             )

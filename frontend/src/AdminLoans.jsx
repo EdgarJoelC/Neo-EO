@@ -37,7 +37,7 @@ export default function AdminLoans() {
   const fetchLoans = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:8080/api/admin/loans", {
+      const res = await axios.get("/api/admin/loans", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setLoans(res.data || []);
@@ -74,7 +74,7 @@ export default function AdminLoans() {
     setActionLoading(true);
     try {
       await axios.patch(
-        `http://localhost:8080/api/admin/loans/${selectedLoan.id}/approve`,
+        `/api/admin/loans/${selectedLoan.id}/approve`,
         { notes: adminNotes || "Aprobado y desembolsado por administración" },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -97,7 +97,7 @@ export default function AdminLoans() {
     setActionLoading(true);
     try {
       await axios.patch(
-        `http://localhost:8080/api/admin/loans/${selectedLoan.id}/reject`,
+        `/api/admin/loans/${selectedLoan.id}/reject`,
         { notes: adminNotes || "Rechazado tras evaluación crediticia" },
         { headers: { Authorization: `Bearer ${token}` } }
       );
